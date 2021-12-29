@@ -41,7 +41,6 @@ namespace NicUtils {
             }
             return list;
         }
-
         public static List<T> Unroll2DEnumerable(IEnumerable<IEnumerable<T>> enumOfEnums, bool traverseColumnsFirst = false) {
             List<T> list = new List<T>();
             if (traverseColumnsFirst) {
@@ -59,6 +58,19 @@ namespace NicUtils {
             }
 
             return list;
+        }
+        public static List<int> ComplementaryIndices(IEnumerable<int> givenIndices, int indexCount) {
+            List<int> sortedGivenIndices = givenIndices.OrderBy(x => x).ToList();
+            List<int> complementaryIndices = new List<int>();
+            int nextGivenIndexInd = 0;
+            for (int i = 0; i < indexCount; i++) {
+                if (nextGivenIndexInd < sortedGivenIndices.Count()) {
+                    if (i < sortedGivenIndices.ElementAt(nextGivenIndexInd)) { complementaryIndices.Add(i); } else { nextGivenIndexInd++; }
+                } else {
+                    complementaryIndices.Add(i);
+                }
+            }
+            return complementaryIndices;
         }
     }
 }
