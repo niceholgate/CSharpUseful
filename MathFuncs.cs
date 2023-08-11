@@ -19,7 +19,7 @@ namespace NicUtils {
 
     public class Distances2D {
         public enum HeuristicType { Euclidian, Octile, Manhattan }
-        //public static readonly string[] heuristicTypes = { "euclidian", "octile", "manhattan" };
+
         public static double GetDistance(double[] coords1, double[] coords2, HeuristicType heuristicType) {
             // Check that the coordinates are both of the same length
             if (coords1.Length != coords2.Length) { throw new ArgumentException($"Coordinates must of the same length, but instead are of lengths {coords1.Length} and {coords2.Length}."); }

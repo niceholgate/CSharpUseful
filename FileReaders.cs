@@ -6,7 +6,7 @@ using System.Collections;
 
 namespace NicUtils
 {
-    public class CSVReader<T>
+    public static class CSVReader<T>
     {
         public static List<T[]> ReadCSV(string filepath, char splitChar = ',') {
             var reader = new StreamReader(filepath);
