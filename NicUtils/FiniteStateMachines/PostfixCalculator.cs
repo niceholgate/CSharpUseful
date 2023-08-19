@@ -1,4 +1,8 @@
-﻿namespace NicUtils.FiniteStateMachines
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace NicUtils.FiniteStateMachines
 {
     public class PostfixCalculator
     {
@@ -61,7 +65,7 @@
                     { (PostfixState.BothOperands, PostfixEvent.Operator), (PostfixState.LeftOperand, CalcLeft) },
                     { (PostfixState.BothOperands, PostfixEvent.Unknown), (PostfixState.End, SetErrorUnknownSymbol) },
             };
-            stateMachine = new(stateTransitions, PostfixState.NeitherOperand);
+            stateMachine = new(stateTransitions, PostfixState.NeitherOperand, OnReset);
         }
 
         public void Calculate(string postfixString)
@@ -72,7 +76,6 @@
                 return;
             }
             stateMachine.Reset();
-            lastEventPosition = -1;
 
             string[] rawEvents = postfixString.Split(delimiter);
             foreach (string rawEvent in rawEvents)
@@ -83,6 +86,16 @@
                 ProcessEvent(rawEvent);
             }
             if (!stateMachine.HasEnded) ProcessEvent("=");
+        }
+
+        private void OnReset() {
+            Result = null;
+            Error = null;
+            lastEventPosition = -1;
+            lastRawEvent = "";
+            lastDouble = 0.0;
+            left = 0.0;
+            right = 0.0;
         }
 
         private void ProcessEvent(string rawEvent)
