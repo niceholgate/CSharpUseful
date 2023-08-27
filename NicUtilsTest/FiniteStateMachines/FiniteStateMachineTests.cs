@@ -2,11 +2,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Metrics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
+using static NicUtils.TestHelpers;
 using NicUtils.FiniteStateMachines;
 
 
@@ -17,7 +15,7 @@ public class FiniteStateMachineTests {
 
     private static readonly List<String> stateHistory = new() { "initial" };
 
-    private static Dictionary<(String, String), (String, Action)> transitionsGood = new() {
+    private static readonly Dictionary<(String, String), (String, Action)> transitionsGood = new() {
             { ("initial", "eventA"), ("interim", ()=>{eventHistory.Add("A"); stateHistory.Add("interim"); }) },
             { ("interim", "eventA"), ("initial", ()=>{eventHistory.Add("A"); stateHistory.Add("initial"); }) },
             { ("interim", "eventB"), ("end", ()=>{eventHistory.Add("B"); stateHistory.Add("end"); }) }
@@ -79,21 +77,6 @@ public class FiniteStateMachineTests {
         };
         AssertThrowsExceptionWithMessage<ArgumentException>(() => { FiniteStateMachine<String, String> sut = new(transitionsCanExitEndState, "initial", () => { }); },
             "The END state should not be exitable!");
-    }
-
-    /*
-     * Assert sequences are equal with better clarity on failures. TODO: make generic - is reference equality a concern?
-     */
-    private static void AssertSequencesAreEqual(IEnumerable<String> seqA, IEnumerable<String> seqB) {
-        Assert.AreEqual(seqA.Count(), seqB.Count());
-        foreach ((String a, String b) pair in seqA.Zip(seqB, (a, b) => { return (a, b); })) {
-            Assert.AreEqual(pair.a, pair.b);
-        }
-    }
-
-    private static void AssertThrowsExceptionWithMessage<TExpectedException>(Action action, String expectedMessage) where TExpectedException : Exception {
-        var ex = Assert.ThrowsException<TExpectedException>(action);
-        Assert.AreEqual(expectedMessage, ex.Message);
     }
 }
 

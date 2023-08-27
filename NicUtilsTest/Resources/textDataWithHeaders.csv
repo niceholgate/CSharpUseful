@@ -1,0 +1,3 @@
+col1,col2,col3
+hello,,col 2 is empty!
+goodbye,this col 2 is not empty,2.678
