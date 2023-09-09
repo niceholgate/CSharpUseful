@@ -13,35 +13,6 @@ namespace NicUtils {
             return false;
         }
 
-        //public static T[][] MultiDimToJagged2D(T[,] multiDimArray) {
-        //    int rows = multiDimArray.GetLength(0);
-        //    T[][] jagged = new T[rows][];
-        //    for (int i = 0; i < rows; i++) {
-        //        jagged[0] = multiDimArray.SliceRow(i).ToArray();
-        //    }
-        //    return jagged;
-        //}
-
-        //public static List<T> Unroll2DMultiDimArray(T[,] multiDimArray, bool traverseColumnsFirst = false) {
-        //    List<T> list = new();
-        //    int rows = multiDimArray.GetLength(0);
-        //    int cols = multiDimArray.GetLength(1);
-        //    if (traverseColumnsFirst) {
-        //        for (int j = 0; j < cols; j++) {
-        //            for (int i = 0; i < rows; i++) {
-        //                list.Add(multiDimArray[i, j]);
-        //            }
-        //        }
-        //    } else {
-        //        for (int i = 0; i < rows; i++) {
-        //            for (int j = 0; j < cols; j++) {
-        //                list.Add(multiDimArray[i, j]);
-        //            }
-        //        }
-        //    }
-        //    return list;
-        //}
-
         public static List<T> Unroll2DEnumerable(IEnumerable<IEnumerable<T>> enumOfEnums, bool traverseColumnsFirst = false) {
             List<T> list = new();
             if (traverseColumnsFirst) {

@@ -96,31 +96,22 @@ namespace NicUtils {
     }
 
     public static class MatrixExtensions {
-        public static Vector<T> ToVector<T>(this Matrix<T> mat, bool traverseColumnsFirst = false) where T : struct, System.IEquatable<T>, System.IFormattable {
-            List<T> unrolled = Enumerables<T>.Unroll2DEnumerable(mat.ToRowArrays(), traverseColumnsFirst);
+        public static Vector<T> ToVector<T>(this Matrix<T> mat, bool traverseColumns = false) where T : struct, IEquatable<T>, IFormattable {
+            List<T> unrolled = Enumerables<T>.Unroll2DEnumerable(mat.ToRowArrays(), traverseColumns);
             return Vector<T>.Build.DenseOfEnumerable(unrolled);
         }
-        public static Matrix<T> ExcludeFirstColumn<T>(this Matrix<T> mat) where T : struct, System.IEquatable<T>, System.IFormattable {
-            IEnumerable<int> keepColumns = Enumerable.Range(1, mat.ColumnCount - 1);
-            return mat.KeepColumns(keepColumns);
-        }
 
-        public static Matrix<T> ExcludeFirstRow<T>(this Matrix<T> mat) where T : struct, System.IEquatable<T>, System.IFormattable {
-            IEnumerable<int> keepRows = Enumerable.Range(1, mat.RowCount - 1);
-            return mat.KeepRows(keepRows);
-        }
-
-        public static Matrix<T> ExcludeColumns<T>(this Matrix<T> mat, IEnumerable<int> excludeColumns) where T : struct, System.IEquatable<T>, System.IFormattable {
+        public static Matrix<T> ExcludeColumns<T>(this Matrix<T> mat, IEnumerable<int> excludeColumns) where T : struct, IEquatable<T>, IFormattable {
             IEnumerable<int> keepColumns = Enumerables<int>.ComplementaryIndices(excludeColumns, mat.ColumnCount);
             return mat.KeepColumns(keepColumns);
         }
 
-        public static Matrix<T> ExcludeRows<T>(this Matrix<T> mat, IEnumerable<int> excludeRows) where T : struct, System.IEquatable<T>, System.IFormattable {
+        public static Matrix<T> ExcludeRows<T>(this Matrix<T> mat, IEnumerable<int> excludeRows) where T : struct, IEquatable<T>, IFormattable {
             IEnumerable<int> keepRows = Enumerables<int>.ComplementaryIndices(excludeRows, mat.RowCount);
             return mat.KeepRows(keepRows);
         }
 
-        public static Matrix<T> KeepColumns<T>(this Matrix<T> mat, IEnumerable<int> keepColumns) where T : struct, System.IEquatable<T>, System.IFormattable {
+        public static Matrix<T> KeepColumns<T>(this Matrix<T> mat, IEnumerable<int> keepColumns) where T : struct, IEquatable<T>, IFormattable {
             List<int> sortedKeepColumns = keepColumns.OrderBy(x => x).ToList();
             List<T[]> newColumns = new();
             foreach (int col in sortedKeepColumns) {
@@ -129,7 +120,7 @@ namespace NicUtils {
             return Matrix<T>.Build.DenseOfColumnArrays(newColumns);
         }
 
-        public static Matrix<T> KeepRows<T>(this Matrix<T> mat, IEnumerable<int> keepRows) where T : struct, System.IEquatable<T>, System.IFormattable {
+        public static Matrix<T> KeepRows<T>(this Matrix<T> mat, IEnumerable<int> keepRows) where T : struct, IEquatable<T>, IFormattable {
             List<int> sortedKeepRows = keepRows.OrderBy(x => x).ToList();
             List<T[]> newRows = new List<T[]>();
             foreach (int row in sortedKeepRows) {
@@ -138,23 +129,23 @@ namespace NicUtils {
             return Matrix<T>.Build.DenseOfRowArrays(newRows);
         }
 
-        public static double Min(this Matrix<double> mat) {
+        public static double? Min(this Matrix<double> mat) {
+            if (mat.RowCount == 0) return null;
             double min = double.MaxValue;
-            for (int i = 0; i < mat.RowCount; i++) {
-                for (int j = 0; j < mat.ColumnCount; j++) {
-                    double newEl = mat.Row(i).ElementAt(j);
-                    if (newEl < min) { min = newEl; };
+            foreach (Vector<double> row in mat.EnumerateRows()) {
+                foreach (double el in row) {
+                    if (el < min) min = el;
                 }
             }
             return min;
         }
 
-        public static double Max(this Matrix<double> mat) {
+        public static double? Max(this Matrix<double> mat) {
+            if (mat.RowCount == 0) return null;
             double max = double.MinValue;
-            for (int i = 0; i < mat.RowCount; i++) {
-                for (int j = 0; j < mat.ColumnCount; j++) {
-                    double newEl = mat.Row(i).ElementAt(j);
-                    if (newEl > max) { max = newEl; };
+            foreach (Vector<double> row in mat.EnumerateRows()) {
+                foreach (double el in row) {
+                    if (el > max) max = el;
                 }
             }
             return max;
