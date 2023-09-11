@@ -31,13 +31,13 @@ public class FiniteStateMachineTests {
         sut.Accept("eventB");
 
         Assert.IsTrue(sut.HasEnded);
-        Assert.IsTrue(eventHistory.SequenceEqual(new List<String> { "A", "A", "A", "B" }));
-        AssertSequencesAreEqual(stateHistory, new List<String> { "initial", "interim", "initial", "interim", "end" });
+        Assert.IsTrue(eventHistory.SequenceEqual(ListOf("A", "A", "A", "B")));
+        AssertSequencesAreEqual(stateHistory, ListOf("initial", "interim", "initial", "interim", "end"));
 
         sut.Reset();
         Assert.IsFalse(sut.HasEnded);
-        Assert.IsTrue(eventHistory.SequenceEqual(new List<String> { }));
-        Assert.IsTrue(stateHistory.SequenceEqual(new List<String> { "initial" }));
+        Assert.IsTrue(eventHistory.SequenceEqual(ListOf<string>()));
+        Assert.IsTrue(stateHistory.SequenceEqual(ListOf("initial")));
     }
 
     [TestMethod]

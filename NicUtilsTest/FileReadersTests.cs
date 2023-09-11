@@ -14,9 +14,9 @@ public class FileReadersTests {
         int expectedRows = 3;
         Assert.AreEqual(expectedRows, data.Count);
         Assert.IsNull(headers);
-        AssertSequencesAreEqual(data.ElementAt(0), new List<double?>() { 3.45, 6.4, 4.63 });
-        AssertSequencesAreEqual(data.ElementAt(1), new List<double?>() { 356.66, 33, 486.653 });
-        AssertSequencesAreEqual(data.ElementAt(2), new List<double?>() { null, 0, 1 });
+        AssertSequencesAreEqual(data.ElementAt(0), ListOf<double?>(3.45, 6.4, 4.63));
+        AssertSequencesAreEqual(data.ElementAt(1), ListOf<double?>(356.66, 33, 486.653));
+        AssertSequencesAreEqual(data.ElementAt(2), ListOf<double?>(null, 0, 1));
     }
 
     [TestMethod]
@@ -28,9 +28,9 @@ public class FileReadersTests {
         int expectedRows = 3;
         Assert.AreEqual(expectedRows, data.Count);
         Assert.IsNull(headers);
-        AssertSequencesAreEqual(data.ElementAt(0), new List<double>() { 3.45, 6.4, 4.63 });
-        AssertSequencesAreEqual(data.ElementAt(1), new List<double>() { 356.66, 33, 486.653 });
-        AssertSequencesAreEqual(data.ElementAt(2), new List<double>() { 0, 0, 1 });
+        AssertSequencesAreEqual(data.ElementAt(0), ListOf(3.45, 6.4, 4.63));
+        AssertSequencesAreEqual(data.ElementAt(1), ListOf(356.66, 33, 486.653));
+        AssertSequencesAreEqual(data.ElementAt(2), ListOf<double>(0, 0, 1));
     }
 
     [TestMethod]
@@ -42,9 +42,9 @@ public class FileReadersTests {
         int expectedRows = 3;
         Assert.AreEqual(expectedRows, data.Count);
         AssertSequencesAreEqual(headers, new List<string>() { "col1", "col2", "col3" });
-        AssertSequencesAreEqual(data.ElementAt(0), new List<double?>() { 3.45, 6.4, 4.63 });
-        AssertSequencesAreEqual(data.ElementAt(1), new List<double?>() { 356.66, 33, 486.653 });
-        AssertSequencesAreEqual(data.ElementAt(2), new List<double?>() { null, 0, 1 });
+        AssertSequencesAreEqual(data.ElementAt(0), ListOf<double?>(3.45, 6.4, 4.63));
+        AssertSequencesAreEqual(data.ElementAt(1), ListOf<double?>(356.66, 33, 486.653));
+        AssertSequencesAreEqual(data.ElementAt(2), ListOf<double?>(null, 0, 1));
     }
 
     [TestMethod]
@@ -55,8 +55,8 @@ public class FileReadersTests {
 
         int expectedRows = 2;
         Assert.AreEqual(expectedRows, data.Count);
-        AssertSequencesAreEqual(headers, new List<string>() { "col1", "col2", "col3" });
-        AssertSequencesAreEqual(data.ElementAt(0), new List<string>() { "hello", null, "col 2 is empty!" });
-        AssertSequencesAreEqual(data.ElementAt(1), new List<string>() { "goodbye", "this col 2 is not empty", "2.678" });
+        AssertSequencesAreEqual(headers, ListOf("col1", "col2", "col3" ));
+        AssertSequencesAreEqual(data.ElementAt(0), ListOf("hello", null, "col 2 is empty!"));
+        AssertSequencesAreEqual(data.ElementAt(1), ListOf("goodbye", "this col 2 is not empty", "2.678"));
     }
 }

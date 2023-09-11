@@ -42,5 +42,12 @@ namespace NicUtils {
             var ex = Assert.ThrowsException<TExpectedException>(action);
             Assert.AreEqual(expectedMessage, ex.Message);
         }
+
+        /*
+         * A compact way to make lists.
+         */
+        public static IList<T> ListOf<T>(params T[] elements) {
+            return new List<T>(elements);
+        }
     }
 }

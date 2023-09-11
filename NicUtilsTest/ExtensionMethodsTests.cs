@@ -14,33 +14,33 @@ public class ExtensionMethodsTests {
     private static Matrix<Double> matrix = Matrix<Double>.Build.DenseOfArray(
         new Double[,] { { 1.0, 2.0, 3.0 }, { 4.0, 5.0, 6.0 } });
 
-    private static IEnumerable<int> enumerable = new List<int>() { 2, 1, -1, 4 ,3 };
+    private static readonly IEnumerable<int> enumerable = ListOf(2, 1, -1, 4, 3);
 
     [TestMethod]
     public void Array2D_SliceRow() {
-        AssertSequencesAreEqual(array2d.SliceRow(1), new int?[]{ 3, null });
+        AssertSequencesAreEqual(array2d.SliceRow(1), ListOf<int?>(3, null));
     }
 
     [TestMethod]
     public void Array2D_SliceColumn() {
-        AssertSequencesAreEqual(array2d.SliceColumn(1), new int?[] { 2, null });
+        AssertSequencesAreEqual(array2d.SliceColumn(1), ListOf<int?>(2, null));
     }
 
     [TestMethod]
     public void Array2D_ToJagged() {
         int?[][] jagged = array2d.ToJagged();
-        AssertSequencesAreEqual(jagged[0], new int?[] { 1, 2 });
-        AssertSequencesAreEqual(jagged[1], new int?[] { 3, null });
+        AssertSequencesAreEqual(jagged[0], ListOf<int?>(1, 2));
+        AssertSequencesAreEqual(jagged[1], ListOf<int?>(3, null));
     }
 
     [TestMethod]
     public void Array2D_Unroll2DMultiDimArray_TraverseRows() {
-        AssertSequencesAreEqual(array2d.Unroll2DMultiDimArray(), new int?[] { 1, 2, 3, null });
+        AssertSequencesAreEqual(array2d.Unroll2DMultiDimArray(), ListOf<int?>(1, 2, 3, null));
     }
 
     [TestMethod]
     public void Array2D_Unroll2DMultiDimArray_TraverseColumns() {
-        AssertSequencesAreEqual(array2d.Unroll2DMultiDimArray(true), new int?[] { 1, 3, 2, null });
+        AssertSequencesAreEqual(array2d.Unroll2DMultiDimArray(true), ListOf<int?>(1, 3, 2, null));
     }
 
     [TestMethod]
@@ -158,34 +158,54 @@ public class ExtensionMethodsTests {
     }
 
     [TestMethod]
-    public void IndexOfMax() {
+    public void Enumerable_IndexOfMax() {
         Assert.AreEqual(enumerable.IndexOfMax(), 3);
     }
 
     [TestMethod]
-    public void IndexOfMax_EmptyEnumerable() {
-        Assert.AreEqual(new List<int>() { }.IndexOfMax(), -1);
+    public void Enumerable_IndexOfMax_EmptyEnumerable() {
+        Assert.AreEqual(ListOf<int>().IndexOfMax(), -1);
     }
 
     [TestMethod]
-    public void IndexOfMin() {
+    public void Enumerable_IndexOfMin() {
         Assert.AreEqual(enumerable.IndexOfMin(), 2);
     }
 
     [TestMethod]
-    public void IndexOfMin_EmptyEnumerable() {
-        Assert.AreEqual(new List<int>() { }.IndexOfMin(), -1);
+    public void Enumerable_IndexOfMin_EmptyEnumerable() {
+        Assert.AreEqual(ListOf<int>().IndexOfMin(), -1);
+    }
+
+    [TestMethod]
+    public void Enumerable_ContainedBy_True() {
+        Assert.IsTrue(enumerable.ContainedBy(ListOf(ListOf(1, 2, 3), new List<int>(enumerable))));
+    }
+
+    [TestMethod]
+    public void Enumerable_ContainedBy_False() {
+        Assert.IsFalse(enumerable.ContainedBy(ListOf(ListOf(1, 2, 3), ListOf(1, 2, 2))));
+    }
+
+    [TestMethod]
+    public void Enumerable_Unroll2DEnumerable_TraverseRows() {
+        AssertSequencesAreEqual(ListOf(1, 2, 3, 4, 5), ListOf(ListOf(1, 2, 3), ListOf(4, 5)).Unroll2DEnumerable());
+    }
+
+    [TestMethod]
+    public void Enumerable_Unroll2DEnumerable_TraverseColumns() {
+        AssertSequencesAreEqual(ListOf(1, 4, 2, 5, 3), ListOf(ListOf(1, 2, 3), ListOf(4, 5)).Unroll2DEnumerable(true));
     }
 
     [TestMethod]
     public void Matrix_ToVector_TraverseRows() {
-        Vector<Double> expected = Vector<Double>.Build.DenseOfArray(new Double[] { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 });
+        Vector<Double> expected = Vector<Double>.Build.DenseOfEnumerable(ListOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0));
         Assert.AreEqual(expected, matrix.ToVector());
     }
 
     [TestMethod]
     public void Matrix_ToVector_TraverseColumns() {
-        Vector<Double> expected = Vector<Double>.Build.DenseOfArray(new Double[] { 1.0, 4.0, 2.0, 5.0, 3.0, 6.0 });
+        Vector<Double> expected = Vector<Double>.Build.DenseOfEnumerable(ListOf(1.0, 4.0, 2.0, 5.0, 3.0, 6.0));
         Assert.AreEqual(expected, matrix.ToVector(true));
     }
 
@@ -197,7 +217,7 @@ public class ExtensionMethodsTests {
 
     [TestMethod]
     public void Matrix_ExcludeRows() {
-        Matrix<Double> expected = Matrix<Double>.Build.DenseOfArray(new Double[,] { { 4.0 , 5.0, 6.0 } });
+        Matrix<Double> expected = Matrix<Double>.Build.DenseOfArray(new Double[,] { { 4.0, 5.0, 6.0 } });
         Assert.AreEqual(expected, matrix.ExcludeRows(Enumerable.Range(0, 1)));
     }
 
@@ -205,6 +225,12 @@ public class ExtensionMethodsTests {
     public void Matrix_KeepColumns() {
         Matrix<Double> expected = Matrix<Double>.Build.DenseOfArray(new Double[,] { { 2.0, 3.0 }, { 5.0, 6.0 } });
         Assert.AreEqual(expected, matrix.KeepColumns(Enumerable.Range(1, 2)));
+    }
+
+    [TestMethod]
+    public void Matrix_KeepRows() {
+        Matrix<Double> expected = Matrix<Double>.Build.DenseOfArray(new Double[,] { { 4.0, 5.0, 6.0 } });
+        Assert.AreEqual(expected, matrix.KeepRows(Enumerable.Range(1, 1)));
     }
 
     [TestMethod]

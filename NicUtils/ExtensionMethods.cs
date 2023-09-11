@@ -59,6 +59,9 @@ namespace NicUtils {
                     return (false, default(T));
                 }
         }
+    }
+
+    public static class EnumerableExtensions {
 
         public static int IndexOfMax<T>(this IEnumerable<T> enumerable) where T : IComparable<T> {
             if (!enumerable.Any()) {
@@ -93,21 +96,45 @@ namespace NicUtils {
                 return indexOfMin;
             }
         }
+
+        public static bool ContainedBy<T>(this IEnumerable<T> searchEnum, IEnumerable<IEnumerable<T>> enumOfEnums) {
+            foreach (IEnumerable<T> e in enumOfEnums) {
+                if (e.SequenceEqual(searchEnum)) return true;
+            }
+            return false;
+        }
+
+        public static IEnumerable<T> Unroll2DEnumerable<T>(this IEnumerable<IEnumerable<T>> enumOfEnums, bool traverseColumns = false) {
+            List<T> list = new();
+            if (traverseColumns) {
+                int maxInnerEnumLength = (from e in enumOfEnums select e.Count()).Max();
+                for (int col = 0; col < maxInnerEnumLength; col++) {
+                    foreach (IEnumerable<T> e in enumOfEnums) {
+                        if (col < e.Count()) list.Add(e.ElementAt(col));
+                    }
+                }
+            } else {
+                foreach (IEnumerable<T> e in enumOfEnums) {
+                    list.AddRange(e);
+                }
+            }
+            return list;
+        }
     }
 
-    public static class MatrixExtensions {
+        public static class MatrixExtensions {
         public static Vector<T> ToVector<T>(this Matrix<T> mat, bool traverseColumns = false) where T : struct, IEquatable<T>, IFormattable {
-            List<T> unrolled = Enumerables<T>.Unroll2DEnumerable(mat.ToRowArrays(), traverseColumns);
+            IEnumerable<T> unrolled = mat.ToRowArrays().Unroll2DEnumerable(traverseColumns);
             return Vector<T>.Build.DenseOfEnumerable(unrolled);
         }
 
         public static Matrix<T> ExcludeColumns<T>(this Matrix<T> mat, IEnumerable<int> excludeColumns) where T : struct, IEquatable<T>, IFormattable {
-            IEnumerable<int> keepColumns = Enumerables<int>.ComplementaryIndices(excludeColumns, mat.ColumnCount);
+            IEnumerable<int> keepColumns = Enumerable.Range(0, mat.ColumnCount).Except(excludeColumns);
             return mat.KeepColumns(keepColumns);
         }
 
         public static Matrix<T> ExcludeRows<T>(this Matrix<T> mat, IEnumerable<int> excludeRows) where T : struct, IEquatable<T>, IFormattable {
-            IEnumerable<int> keepRows = Enumerables<int>.ComplementaryIndices(excludeRows, mat.RowCount);
+            IEnumerable<int> keepRows = Enumerable.Range(0, mat.RowCount).Except(excludeRows);
             return mat.KeepRows(keepRows);
         }
 
