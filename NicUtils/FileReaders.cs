@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
+using NicUtils.ExtensionMethods;
 
 namespace NicUtils {
 
@@ -14,7 +15,7 @@ namespace NicUtils {
 
         public List<string> Headers { get; private set; } = null;
 
-        private List<List<string>> stringData = new();
+        private readonly List<List<string>> stringData = new();
 
         public CSVReader(string filepath, bool withHeaders, char splitChar = ',') {
             WithHeaders = withHeaders;
@@ -23,7 +24,7 @@ namespace NicUtils {
         }
 
         private void ReadCSV(string filepath) {
-            StreamReader reader = new StreamReader(filepath);
+            StreamReader reader = new(filepath);
             while (!reader.EndOfStream) {
                 string line = reader.ReadLine();
                 if (WithHeaders && Headers == null) {
