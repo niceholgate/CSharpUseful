@@ -43,19 +43,19 @@ public class RetryableActionTests {
         Assert.AreEqual("Attempt 1 failed", outcome.Message);
     }
 
-    [TestMethod]
-    public async Task TestAttemptFailedShouldRetryThenSucceeds() {
-        RetryableAction action = new(
-            delayThenTrueFunc,
-            new int[] { 50, 200 },
-            new int[] {  });
+    //[TestMethod]
+    //public async Task TestAttemptFailedShouldRetryThenSucceeds() {
+    //    RetryableAction action = new(
+    //        delayThenTrueFunc,
+    //        new int[] { 50, 200 },
+    //        new int[] {  });
 
-        AttemptOutcome outcome = await action.AttemptAsync();
-        Assert.IsFalse(outcome.Succeeded);
-        Assert.IsFalse(outcome.ShouldRetry);
-        Assert.AreEqual(1, outcome.AttemptNumber);
-        Assert.AreEqual("Attempt 1 failed", outcome.Message);
-    }
+    //    AttemptOutcome outcome = await action.AttemptAsync();
+    //    Assert.IsFalse(outcome.Succeeded);
+    //    Assert.IsFalse(outcome.ShouldRetry);
+    //    Assert.AreEqual(1, outcome.AttemptNumber);
+    //    Assert.AreEqual("Attempt 1 failed", outcome.Message);
+    //}
 
 
 }

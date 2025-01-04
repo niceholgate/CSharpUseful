@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Xml;
 
 namespace NicUtils.FiniteStateMachines {
+    // TODO: what is the purpose of this rather than just a consolidated FiniteStateMachine class?
     public abstract class AbstractFiniteStateMachine<TState, TEvent, TAction>
         where TState : notnull where TEvent : notnull {
 
@@ -61,7 +62,7 @@ namespace NicUtils.FiniteStateMachines {
             CurrentState = initialState;
         }
         
-        //private static void ValidateTransitions
+        // TODO: private static void ValidateTransitions
 
         public abstract void Accept(TEvent evnt);
 

@@ -50,8 +50,7 @@ namespace NicUtils.FiniteStateMachines
 
         private double lastDouble = 0.0;
 
-        public PostfixCalculator()
-        {
+        public PostfixCalculator() {
             stateTransitions = new() {
                     { (PostfixState.NeitherOperand, PostfixEvent.Operand), (PostfixState.LeftOperand, SetLeft) },
                     { (PostfixState.NeitherOperand, PostfixEvent.Operator), (PostfixState.End, SetErrorUnexpectedOperator) },
@@ -68,8 +67,7 @@ namespace NicUtils.FiniteStateMachines
             stateMachine = new(stateTransitions, PostfixState.NeitherOperand, OnReset);
         }
 
-        public void Calculate(string postfixString)
-        {
+        public void Calculate(string postfixString) {
             if (postfixString.Count(f => f == delimiter) < 2)
             {
                 Error = "Bad postfix expression: there should be at least 2 delimiters (|)";
@@ -98,8 +96,7 @@ namespace NicUtils.FiniteStateMachines
             right = 0.0;
         }
 
-        private void ProcessEvent(string rawEvent)
-        {
+        private void ProcessEvent(string rawEvent) {
             PostfixEvent evnt = PostfixEvent.Unknown;
             if (knownOperators.ContainsKey(rawEvent))
             {
@@ -114,38 +111,31 @@ namespace NicUtils.FiniteStateMachines
             stateMachine.Accept(evnt);
         }
 
-        private void SetLeft()
-        {
+        private void SetLeft() {
             left = lastDouble;
         }
 
-        private void SetRight()
-        {
+        private void SetRight() {
             right = lastDouble;
         }
 
-        private void CalcLeft()
-        {
+        private void CalcLeft() {
             left = currentOperator(left, right);
         }
 
-        private void SetResult()
-        {
+        private void SetResult() {
             Result = left;
         }
 
-        private void SetErrorUnexpectedOperator()
-        {
+        private void SetErrorUnexpectedOperator() {
             Error = $"Bad postfix expression: unexpected operator \"{lastRawEvent}\" in position {lastEventPosition}";
         }
 
-        private void SetErrorUnexpectedOperand()
-        {
+        private void SetErrorUnexpectedOperand() {
             Error = $"Bad postfix expression: unexpected operand \"{lastRawEvent}\" in position {lastEventPosition}";
         }
 
-        private void SetErrorUnknownSymbol()
-        {
+        private void SetErrorUnknownSymbol() {
             Error = $"Bad postfix expression: unknown symbol \"{lastRawEvent}\" in position {lastEventPosition}";
         }
 
