@@ -126,4 +126,19 @@ public class PostfixCalculatorTests {
         Assert.IsNull(sut.Result);
         Assert.AreEqual("Bad postfix expression: unknown symbol \"&&&\" in position 10", sut.Error);
     }
+
+    [TestMethod]
+    public void TestGetMermaidDiagram() {
+        string diagram = sut.GetMermaidDiagram();
+        string filepath = "../../../Resources/PostfixCalculatorStateDiagram.mmd";
+
+        //using (StreamWriter outputFile = new StreamWriter(filepath)) {
+        //    outputFile.WriteLine(diagram);
+        //}
+
+        List<string> generatedLines = diagram.Split('\n').ToList();
+        List<string> persistedLines = new NicUtils.TextLineReader(filepath).GetData();
+
+        NicUtils.TestHelpers.AssertSequencesAreEqual(generatedLines, persistedLines);
+    }
 }

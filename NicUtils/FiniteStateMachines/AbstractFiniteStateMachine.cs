@@ -69,5 +69,20 @@ namespace NicUtils.FiniteStateMachines {
         protected static bool IsEndState(TState state) {
             return state.ToString().ToUpper().Equals("END");
         }
+
+        public string GetMermaidDiagram() {
+            StringBuilder diagram = new StringBuilder();
+
+            diagram.Append("stateDiagram-v2");
+            diagram.Append('\n');
+
+            foreach (var item in transitions) {
+                diagram.Append($"    {item.Key.currentState} --> {item.Value.newState}: {item.Key.evnt}");
+                diagram.Append('\n');
+            }
+            diagram.Remove(diagram.Length-1, 1);
+
+            return diagram.ToString();
+        }
     }
 }

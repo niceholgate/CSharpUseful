@@ -1,0 +1,10 @@
+stateDiagram-v2
+    NeitherOperand --> LeftOperand: Operand
+    NeitherOperand --> End: Operator
+    NeitherOperand --> End: Unknown
+    LeftOperand --> BothOperands: Operand
+    LeftOperand --> End: Operator
+    LeftOperand --> End: Unknown
+    BothOperands --> End: Operand
+    BothOperands --> LeftOperand: Operator
+    BothOperands --> End: Unknown

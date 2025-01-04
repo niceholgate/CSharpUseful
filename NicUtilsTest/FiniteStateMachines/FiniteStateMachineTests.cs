@@ -78,5 +78,22 @@ public class FiniteStateMachineTests {
         AssertThrowsExceptionWithMessage<ArgumentException>(() => { FiniteStateMachine<String, String> sut = new(transitionsCanExitEndState, "initial", () => { }); },
             "The END state should not be exitable!");
     }
+
+    [TestMethod]
+    public void TestGetMermaidDiagram() {
+        FiniteStateMachine<String, String> sut = new(transitionsGood, "initial", () => { eventHistory.Clear(); stateHistory.Clear(); stateHistory.Add("initial"); });
+
+        string diagram = sut.GetMermaidDiagram();
+        string filepath = "../../../Resources/RegressionTestStateDiagram.mmd";
+
+        //using (StreamWriter outputFile = new StreamWriter(filepath)) {
+        //    outputFile.WriteLine(diagram);
+        //}
+
+        List<string> generatedLines = diagram.Split('\n').ToList();
+        List<string> persistedLines = new NicUtils.TextLineReader(filepath).GetData();
+
+        NicUtils.TestHelpers.AssertSequencesAreEqual(generatedLines, persistedLines);
+    }
 }
 

@@ -86,6 +86,10 @@ namespace NicUtils.FiniteStateMachines
             if (!stateMachine.HasEnded) ProcessEvent("=");
         }
 
+        public string GetMermaidDiagram() {
+            return stateMachine.GetMermaidDiagram();
+        }
+
         private void OnReset() {
             Result = null;
             Error = null;

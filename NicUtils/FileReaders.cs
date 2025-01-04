@@ -9,7 +9,7 @@ namespace NicUtils {
 
     public class CSVReader {
 
-        public bool WithHeaders {  get; private set; }
+        public bool WithHeaders { get; private set; }
 
         public char SplitChar { get; private set; }
 
@@ -21,6 +21,14 @@ namespace NicUtils {
             WithHeaders = withHeaders;
             SplitChar = splitChar;
             ReadCSV(filepath);
+        }
+
+        public List<List<T>> GetData<T>() {
+            List<List<T>> dataConverted = new();
+            foreach (List<string> row in stringData) {
+                dataConverted.Add(row.Select(el => el.AttemptConversion<T>().result).ToList());
+            }
+            return dataConverted;
         }
 
         private void ReadCSV(string filepath) {
@@ -42,13 +50,29 @@ namespace NicUtils {
             reader.Close();
         }
 
-        public List<List<T>> GetData<T>() {
-            List<List<T>> dataConverted = new();
-            foreach (List<string> row in stringData) {
-                dataConverted.Add(row.Select(el => el.AttemptConversion<T>().result).ToList()) ;
+    }
+
+    public class TextLineReader {
+
+        private readonly List<string> stringData = new();
+
+        public TextLineReader(string filepath) {
+            ReadText(filepath);
+        }
+
+        public List<string> GetData() {
+            return stringData;
+        }
+
+        private void ReadText(string filepath) {
+            StreamReader reader = new(filepath);
+            while (!reader.EndOfStream) {
+                string line = reader.ReadLine() ?? "";
+                stringData.Add(line);
             }
-            return dataConverted;
+            reader.Close();
         }
     }
+
 }
 
