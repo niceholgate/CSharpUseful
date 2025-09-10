@@ -23,6 +23,13 @@ namespace NicUtils {
             return Math.Abs((a - b) / a)  < tolerance && Math.Abs((a - b) / b) < tolerance;
         }
 
+        public static bool AllEqual<T>(params T[] elements) {
+            for (int i = 1; i < elements.Length; i++) {
+                if (!elements[i].Equals(elements[0])) return false;
+            }
+            return true;
+        }
+
         /*
          * Assert sequences are equal with better clarity on failures. TODO: make generic - is reference equality a concern?
          */
