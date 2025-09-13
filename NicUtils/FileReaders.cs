@@ -26,7 +26,8 @@ namespace NicUtils {
         public List<List<T>> GetData<T>() {
             List<List<T>> dataConverted = new();
             foreach (List<string> row in stringData) {
-                dataConverted.Add(row.Select(el => el.AttemptConversion<T>().result).ToList());
+                dataConverted.Add(
+                    row.Where(el => el != null).Select(el =>  el.AttemptConversion<T>().result).ToList());
             }
             return dataConverted;
         }
