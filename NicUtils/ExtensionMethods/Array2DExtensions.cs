@@ -31,5 +31,19 @@ namespace NicUtils.ExtensionMethods {
             }
             return list;
         }
+        
+        public static T[,] Transpose<T>(this T[,] array)
+        {
+            int rows = array.GetLength(0);
+            int cols = array.GetLength(1);
+            T[,] result = new T[cols, rows];
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++) result[j, i] = array[i, j];
+            }
+
+            return result;
+        }
     }
 }
