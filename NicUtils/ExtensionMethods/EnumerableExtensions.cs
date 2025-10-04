@@ -64,5 +64,33 @@ namespace NicUtils.ExtensionMethods {
             }
             return list;
         }
+
+        public static T[,] ToRectangularArray<T>(this IEnumerable<IEnumerable<T>> enumOfEnums)
+        {
+            int height = enumOfEnums.Count();
+            int width = enumOfEnums.ElementAt(0).Count();
+
+            for (int y = 0; y < height; y++)
+            {
+                IEnumerable<T> row = enumOfEnums.ElementAt(y);
+                if (row.Count() != width)
+                {
+                    throw new ArgumentException($"Cannot have a non-rectangular grid " +
+                                                $"(row 0 has length {width} but row {y} has length {row.Count()}).");
+                }
+            }
+
+            T[,] array = new T[width, height];
+
+            for (int i = 0; i < width; i++)
+            {
+                for (int j = 0; j < height; j++)
+                {
+                    array[i, j] = enumOfEnums.ElementAt(j).ElementAt(i);
+                }
+            }
+
+            return array;
+        }
     }
 }
