@@ -1,4 +1,6 @@
-﻿namespace NickUtilsTest;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace NickUtilsTest {
 
 using System;
 using System.Collections.Generic;
@@ -97,3 +99,4 @@ public class FiniteStateMachineTests {
     }
 }
 
+}

@@ -1,4 +1,7 @@
 ﻿
+using System.Collections.Generic;
+using System.Linq;
+
 namespace NicUtils.ExtensionMethods {
     public static class Array2DExtensions {
         public static IEnumerable<T> SliceRow<T>(this T[,] array, int row) {

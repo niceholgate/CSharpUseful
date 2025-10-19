@@ -10,10 +10,10 @@ namespace NicUtils.FiniteStateMachines
         public static readonly char delimiter = '|';
 
         public static readonly Dictionary<string, Func<double, double, double>> knownOperators = new() {
-            { "+", (l, r) => Math.FusedMultiplyAdd(1.0, l, r) },
-            { "-", (l, r) => Math.FusedMultiplyAdd(-1.0, r, l) },
-            { "*", (l, r) => Math.FusedMultiplyAdd(l, r, 0.0) },
-            { "/", (l, r) => Math.FusedMultiplyAdd(l, 1 / r, 0.0) }};
+            { "+", (l, r) => l + r },
+            { "-", (l, r) => l - r },
+            { "*", (l, r) => l * r },
+            { "/", (l, r) => l / r }};
 
         public double? Result { get; private set; } = null;
 

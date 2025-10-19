@@ -1,4 +1,6 @@
-﻿namespace NickUtilsTest;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace NickUtilsTest {
 
 using static NicUtils.TestHelpers;
 using NicUtils.ExtensionMethods;
@@ -34,4 +36,5 @@ public class Array2DExtensionsTests {
     public void Array2D_Unroll2DMultiDimArray_TraverseColumns() {
         AssertSequencesAreEqual(array2d.Unroll2DMultiDimArray(true), ListOf<int?>(1, 3, 2, null));
     }
+}
 }

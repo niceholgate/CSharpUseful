@@ -1,9 +1,13 @@
-﻿namespace NickUtilsTest;
-
+﻿using System.Collections.Generic;
+using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static NicUtils.TestHelpers;
 using NicUtils.FiniteStateMachines;
 
 
+namespace NickUtilsTest
+{
+    
 [TestClass]
 public class PostfixCalculatorTests {
     private readonly PostfixCalculator sut = new();
@@ -141,4 +145,5 @@ public class PostfixCalculatorTests {
 
         NicUtils.TestHelpers.AssertSequencesAreEqual(generatedLines, persistedLines);
     }
+}
 }

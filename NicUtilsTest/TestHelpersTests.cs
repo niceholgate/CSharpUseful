@@ -1,4 +1,7 @@
-﻿namespace NickUtilsTest;
+﻿using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace NickUtilsTest {
 
 using static NicUtils.TestHelpers;
 
@@ -39,4 +42,5 @@ public class TestHelpersTests {
     public void ListOf_None() {
         AssertSequencesAreEqual(new List<int?>(), ListOf<int?>());
     }
+}
 }

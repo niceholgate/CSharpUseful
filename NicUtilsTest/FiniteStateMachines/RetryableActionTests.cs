@@ -1,4 +1,8 @@
-﻿namespace NickUtilsTest;
+﻿using System;
+using System.Threading;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace NickUtilsTest {
 
 using NicUtils.FiniteStateMachines;
 using System.Threading.Tasks;
@@ -58,4 +62,5 @@ public class RetryableActionTests {
     //}
 
 
+}
 }

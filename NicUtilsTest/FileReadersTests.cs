@@ -1,4 +1,8 @@
-﻿namespace NickUtilsTest;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace NickUtilsTest {
 
 using static NicUtils.TestHelpers;
 using NicUtils;
@@ -12,7 +16,7 @@ public class FileReadersTests {
         List<string> headers = reader.Headers;
         
         int expectedRows = 3;
-        Assert.AreEqual(expectedRows, data.Count);
+        Assert.HasCount(expectedRows, data);
         Assert.IsNull(headers);
         AssertSequencesAreEqual(data.ElementAt(0), ListOf<double?>(3.45, 6.4, 4.63));
         AssertSequencesAreEqual(data.ElementAt(1), ListOf<double?>(356.66, 33, 486.653));
@@ -26,7 +30,7 @@ public class FileReadersTests {
         List<string> headers = reader.Headers;
 
         int expectedRows = 3;
-        Assert.AreEqual(expectedRows, data.Count);
+        Assert.HasCount(expectedRows, data);
         Assert.IsNull(headers);
         AssertSequencesAreEqual(data.ElementAt(0), ListOf(3.45, 6.4, 4.63));
         AssertSequencesAreEqual(data.ElementAt(1), ListOf(356.66, 33, 486.653));
@@ -40,7 +44,7 @@ public class FileReadersTests {
         List<string> headers = reader.Headers;
 
         int expectedRows = 3;
-        Assert.AreEqual(expectedRows, data.Count);
+        Assert.HasCount(expectedRows, data);
         AssertSequencesAreEqual(headers, new List<string>() { "col1", "col2", "col3" });
         AssertSequencesAreEqual(data.ElementAt(0), ListOf<double?>(3.45, 6.4, 4.63));
         AssertSequencesAreEqual(data.ElementAt(1), ListOf<double?>(356.66, 33, 486.653));
@@ -54,9 +58,10 @@ public class FileReadersTests {
         List<string> headers = reader.Headers;
 
         int expectedRows = 2;
-        Assert.AreEqual(expectedRows, data.Count);
+        Assert.HasCount(expectedRows, data);
         AssertSequencesAreEqual(headers, ListOf("col1", "col2", "col3" ));
         AssertSequencesAreEqual(data.ElementAt(0), ListOf("hello", null, "col 2 is empty!"));
         AssertSequencesAreEqual(data.ElementAt(1), ListOf("goodbye", "this col 2 is not empty", "2.678"));
     }
+}
 }

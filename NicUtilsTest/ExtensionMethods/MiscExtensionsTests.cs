@@ -1,4 +1,6 @@
-﻿namespace NickUtilsTest;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace NickUtilsTest {
 
 using NicUtils.ExtensionMethods;
 
@@ -117,4 +119,5 @@ public class MiscExtensionsTests {
         Assert.IsTrue(conversion.Item1);
         Assert.AreEqual("0", conversion.Item2);
     }
+}
 }

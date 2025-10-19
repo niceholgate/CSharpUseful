@@ -1,4 +1,7 @@
-﻿using MathNet.Numerics.LinearAlgebra;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace NicUtils.ExtensionMethods {
     public static class MatrixExtensions {

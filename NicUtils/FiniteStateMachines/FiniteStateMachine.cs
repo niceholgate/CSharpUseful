@@ -1,4 +1,8 @@
 ﻿
+using System;
+using System.Collections.Generic;
+using System.IO;
+
 namespace NicUtils.FiniteStateMachines {
     // Events cannot be null, doesn't mean anything?
     // State null means Done?

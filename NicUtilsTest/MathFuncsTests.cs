@@ -1,4 +1,7 @@
-﻿namespace NickUtilsTest;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace NickUtilsTest {
 
 using static NicUtils.TestHelpers;
 using NicUtils;
@@ -48,4 +51,5 @@ public class MathFuncsTests {
         AssertEqualWithinTolerance(Math.Sqrt(2.0) + 1.0, Distances2D.GetDistance(coords1, coords2, Distances2D.HeuristicType.Octile), 1E-9);
         AssertEqualWithinTolerance(3.0, Distances2D.GetDistance(coords1, coords2, Distances2D.HeuristicType.Manhattan), 1E-9);
     }
+}
 }
