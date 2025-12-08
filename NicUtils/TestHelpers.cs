@@ -42,6 +42,13 @@ namespace NicUtils {
                 Assert.AreEqual(pair.a, pair.b);
             }
         }
+        
+        public static void AssertSequencesAreEqualWithinTolerance(IEnumerable<float> seqA, IEnumerable<float> seqB, float tolerance) {
+            Assert.AreEqual(seqA.Count(), seqB.Count());
+            foreach ((float a, float b) pair in seqA.Zip(seqB, (a, b) => { return (a, b); })) {
+                AssertEqualWithinTolerance(pair.a, pair.b, tolerance);
+            }
+        }
 
         public static void AssertThrowsExceptionWithMessage<TExpectedException>(Action action, String expectedMessage) where TExpectedException : Exception {
             var ex = Assert.ThrowsException<TExpectedException>(action);
