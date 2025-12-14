@@ -44,7 +44,7 @@ namespace NicUtils {
         }
 
         public static void AssertThrowsExceptionWithMessage<TExpectedException>(Action action, String expectedMessage) where TExpectedException : Exception {
-            var ex = Assert.ThrowsException<TExpectedException>(action);
+            var ex = Assert.Throws<TExpectedException>(action);
             Assert.AreEqual(expectedMessage, ex.Message);
         }
 
