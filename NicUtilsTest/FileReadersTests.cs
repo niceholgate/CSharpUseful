@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NickUtilsTest {
 
@@ -12,7 +10,7 @@ public class FileReadersTests {
     [TestMethod]
     public void ReadNullableFloatDataWithoutHeaders() {
         CSVReader reader = new("../../../Resources/floatDataWithoutHeaders.csv", false);
-        List<List<double?>> data = reader.GetData<double?>();
+        List<List<double?>> data = reader.GetData<double?>(true);
         List<string> headers = reader.Headers;
         
         int expectedRows = 3;
@@ -26,7 +24,7 @@ public class FileReadersTests {
     [TestMethod]
     public void ReadNotNullableFloatDataWithoutHeaders() {
         CSVReader reader = new("../../../Resources/floatDataWithoutHeaders.csv", false);
-        List<List<double>> data = reader.GetData<double>();
+        List<List<double>> data = reader.GetData<double>(true);
         List<string> headers = reader.Headers;
 
         int expectedRows = 3;
@@ -40,7 +38,7 @@ public class FileReadersTests {
     [TestMethod]
     public void ReadNullableFloatDataWithHeaders() {
         CSVReader reader = new("../../../Resources/floatDataWithHeaders.csv", true);
-        List<List<double?>> data = reader.GetData<double?>();
+        List<List<double?>> data = reader.GetData<double?>(true);
         List<string> headers = reader.Headers;
 
         int expectedRows = 3;
@@ -54,7 +52,7 @@ public class FileReadersTests {
     [TestMethod]
     public void ReadTextDataWithHeaders() {
         CSVReader reader = new("../../../Resources/textDataWithHeaders.csv", true);
-        List<List<string>> data = reader.GetData<string>();
+        List<List<string>> data = reader.GetData<string>(true);
         List<string> headers = reader.Headers;
 
         int expectedRows = 2;

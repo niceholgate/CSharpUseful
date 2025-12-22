@@ -23,11 +23,12 @@ namespace NicUtils {
             ReadCSV(filepath);
         }
 
-        public List<List<T>> GetData<T>() {
+        public List<List<T>> GetData<T>(bool includeNull) {
             List<List<T>> dataConverted = new();
             foreach (List<string> row in stringData) {
                 dataConverted.Add(
-                    row.Where(el => el != null).Select(el =>  el.AttemptConversion<T>().result).ToList());
+                    row.Where(el => includeNull || el != null)
+                        .Select(el => el.AttemptConversion<T>().result).ToList());
             }
             return dataConverted;
         }

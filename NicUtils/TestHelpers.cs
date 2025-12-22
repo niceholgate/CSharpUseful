@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NicUtils {
     public static class TestHelpers {
@@ -51,7 +48,7 @@ namespace NicUtils {
         }
 
         public static void AssertThrowsExceptionWithMessage<TExpectedException>(Action action, String expectedMessage) where TExpectedException : Exception {
-            var ex = Assert.Throws<TExpectedException>(action);
+            var ex = Assert.ThrowsException<TExpectedException>(action);
             Assert.AreEqual(expectedMessage, ex.Message);
         }
 
