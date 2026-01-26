@@ -47,6 +47,7 @@ public class MathFuncsTests {
     public void HeuristicDistances() {
         (double, double) coords1 = ( 0.0, 0.0 );
         (double, double) coords2 = ( 1.0, 2.0 );
+        AssertEqualWithinTolerance(5.0, Distances2D.GetDistance(coords1, coords2, Distances2D.HeuristicType.EuclidianSquared), 1E-9);
         AssertEqualWithinTolerance(Math.Sqrt(5.0), Distances2D.GetDistance(coords1, coords2, Distances2D.HeuristicType.Euclidian), 1E-9);
         AssertEqualWithinTolerance(Math.Sqrt(2.0) + 1.0, Distances2D.GetDistance(coords1, coords2, Distances2D.HeuristicType.Octile), 1E-9);
         AssertEqualWithinTolerance(3.0, Distances2D.GetDistance(coords1, coords2, Distances2D.HeuristicType.Manhattan), 1E-9);
