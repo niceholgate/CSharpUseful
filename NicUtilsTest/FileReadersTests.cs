@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace NickUtilsTest {
+namespace NickUtilsTest;
 
 using static NicUtils.TestHelpers;
 using NicUtils;
@@ -45,7 +45,7 @@ public class FileReadersTests {
 
         int expectedRows = 3;
         Assert.HasCount(expectedRows, data);
-        AssertSequencesAreEqual(headers, new List<string>() { "col1", "col2", "col3" });
+        AssertSequencesAreEqual(headers, new List<string> { "col1", "col2", "col3" });
         AssertSequencesAreEqual(data.ElementAt(0), ListOf<double?>(3.45, 6.4, 4.63));
         AssertSequencesAreEqual(data.ElementAt(1), ListOf<double?>(356.66, 33, 486.653));
         AssertSequencesAreEqual(data.ElementAt(2), ListOf<double?>(null, 0, 1));
@@ -63,5 +63,20 @@ public class FileReadersTests {
         AssertSequencesAreEqual(data.ElementAt(0), ListOf("hello", null, "col 2 is empty!"));
         AssertSequencesAreEqual(data.ElementAt(1), ListOf("goodbye", "this col 2 is not empty", "2.678"));
     }
-}
+        
+    [TestMethod]
+    public void TestTextLineReader() {
+        string filepath = "../../../Resources/textDataWithHeaders.csv";
+        TextLineReader reader = new TextLineReader(filepath);
+                
+        List<string> data = reader.GetData();
+        Assert.AreEqual(3, data.Count);
+        Assert.AreEqual("col1,col2,col3", data[0]);
+        Assert.AreEqual("hello  ,,col 2 is empty!   ", data[1]);
+        Assert.AreEqual("  goodbye,this col 2 is not empty,2.678", data[2]);
+        
+        string joined = reader.GetJoinedLines();
+        string expectedJoined = string.Join(System.Environment.NewLine, data);
+        Assert.AreEqual(expectedJoined, joined);
+    }
 }

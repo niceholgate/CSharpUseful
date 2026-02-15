@@ -87,7 +87,7 @@ namespace NicUtils.FiniteStateMachines
         }
 
         public string GetMermaidDiagram() {
-            return stateMachine.GetMermaidDiagram();
+            return stateMachine.ToMermaidDiagram();
         }
 
         private void OnReset() {

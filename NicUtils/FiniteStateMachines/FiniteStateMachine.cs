@@ -22,15 +22,18 @@ namespace NicUtils.FiniteStateMachines {
             resetAction.Invoke();
         }
 
-        public override void Accept(TEvent evnt) {
+        public override void Accept(TEvent evnt)
+        {
             if (HasEnded) {
                 throw new IOException($"Received an event while at End state: {evnt}");
-            } else if (!transitions.ContainsKey((CurrentState, evnt))) {
-                throw new IOException($"Received illegal event (\"{evnt}\") for the present state (\"{CurrentState}\")");
-            } else { 
-                transitions[(CurrentState, evnt)].action.Invoke();
-                CurrentState = transitions[(CurrentState, evnt)].newState;
             }
+
+            if (!transitions.ContainsKey((CurrentState, evnt))) {
+                throw new IOException($"Received illegal event (\"{evnt}\") for the present state (\"{CurrentState}\")");
+            }
+
+            transitions[(CurrentState, evnt)].action.Invoke();
+            CurrentState = transitions[(CurrentState, evnt)].newState;
         }
     }
 }

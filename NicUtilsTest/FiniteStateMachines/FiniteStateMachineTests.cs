@@ -85,7 +85,7 @@ public class FiniteStateMachineTests {
     public void TestGetMermaidDiagram() {
         FiniteStateMachine<String, String> sut = new(transitionsGood, "initial", () => { eventHistory.Clear(); stateHistory.Clear(); stateHistory.Add("initial"); });
 
-        string diagram = sut.GetMermaidDiagram();
+        string diagram = sut.ToMermaidDiagram();
         string filepath = "../../../Resources/RegressionTestStateDiagram.mmd";
 
         //using (StreamWriter outputFile = new StreamWriter(filepath)) {
@@ -95,7 +95,36 @@ public class FiniteStateMachineTests {
         List<string> generatedLines = diagram.Split('\n').ToList();
         List<string> persistedLines = new NicUtils.TextLineReader(filepath).GetData();
 
-        NicUtils.TestHelpers.AssertSequencesAreEqual(generatedLines, persistedLines);
+        AssertSequencesAreEqual(generatedLines, persistedLines);
+    }
+
+    [TestMethod]
+    public void TestFromMermaidDiagram() {
+        string filepath = "../../../Resources/RegressionTestStateDiagram.mmd";
+        string mermaid = new NicUtils.TextLineReader(filepath).GetJoinedLines();
+
+        var sut = FiniteStateMachine<string, string>.FromMermaidDiagram(mermaid);
+
+        Assert.AreEqual("initial", sut.CurrentState);
+        Assert.IsFalse(sut.HasEnded);
+
+        Assert.AreEqual(transitionsGood.Count, sut.transitions.Count);
+        foreach (var entry in transitionsGood) {
+            Assert.IsTrue(sut.transitions.ContainsKey(entry.Key));
+            Assert.AreEqual(entry.Value.Item1, sut.transitions[entry.Key].newState);
+            // In the Mermaid diagram, the actions are no-op, so we don't compare them with transitionsGood actions
+        }
+    }
+
+    [TestMethod]
+    public void TestFromMermaidDiagram_InvalidHeader() {
+        string mermaid = @"invalid-header
+                            [*] --> initial
+                            initial --> end: event";
+
+        AssertThrowsExceptionWithMessage<ArgumentException>(() => {
+            FiniteStateMachine<string, string>.FromMermaidDiagram(mermaid);
+        }, "Invalid Mermaid diagram header. Expected 'stateDiagram-v2', but found 'invalid-header'.");
     }
 }
 

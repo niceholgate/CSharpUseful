@@ -65,6 +65,10 @@ namespace NicUtils {
         public List<string> GetData() {
             return stringData;
         }
+        
+        public string GetJoinedLines() {
+            return string.Join(Environment.NewLine, stringData);
+        }
 
         private void ReadText(string filepath) {
             StreamReader reader = new(filepath);
