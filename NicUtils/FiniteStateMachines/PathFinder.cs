@@ -30,17 +30,17 @@
 //
 //         }
 //
-//         private readonly Dictionary<(PathFinderState currentState, PathFinderEvent evnt), (PathFinderState newState, Action action)> stateTransitions;
+//         private readonly Dictionary<(PathFinderState currentState, PathFinderEvent evnt), (PathFinderState newState, Expression<Action> action)> stateTransitions;
 //
 //         public PathFinder() {
 //             stateTransitions = new() {
-//                     { (PathFinderState.Pathing, PathFinderEvent.BlockedPath), (PathFinderState.RecalcSubPath, DoNothing) },
-//                     { (PathFinderState.Pathing, PathFinderEvent.NewTarget), (PathFinderState.CalcFullPath, DoNothing) },
-//                     { (PathFinderState.Pathing, PathFinderEvent.StalePath), (PathFinderState.RecalcSubPath, DoNothing) },
-//                     { (PathFinderState.NoTarget, PathFinderEvent.NewTarget), (PathFinderState.CalcFullPath, DoNothing) },
+//                     { (PathFinderState.Pathing, PathFinderEvent.BlockedPath), (PathFinderState.RecalcSubPath, () => DoNothing()) },
+//                     { (PathFinderState.Pathing, PathFinderEvent.NewTarget), (PathFinderState.CalcFullPath, () => DoNothing()) },
+//                     { (PathFinderState.Pathing, PathFinderEvent.StalePath), (PathFinderState.RecalcSubPath, () => DoNothing()) },
+//                     { (PathFinderState.NoTarget, PathFinderEvent.NewTarget), (PathFinderState.CalcFullPath, () => DoNothing()) },
 //                     // TODO: complete these
 //             };
-//             stateMachine = new(stateTransitions, PathFinderState.NoTarget, null);
+//             stateMachine = new(stateTransitions, PathFinderState.NoTarget, () => DoNothing());
 //         }
 //
 //         private void DoNothing() { }

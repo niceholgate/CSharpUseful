@@ -143,7 +143,39 @@ public class PostfixCalculatorTests {
         List<string> generatedLines = diagram.Split('\n').ToList();
         List<string> persistedLines = new NicUtils.TextLineReader(filepath).GetData();
 
-        NicUtils.TestHelpers.AssertSequencesAreEqual(generatedLines, persistedLines);
+        AssertSequencesAreEqual(generatedLines, persistedLines);
+    }
+
+    [TestMethod]
+    public void TestFromMermaidDiagram() {
+        string filepath = "../../../Resources/PostfixCalculatorStateDiagram.mmd";
+        string mermaid = new NicUtils.TextLineReader(filepath).GetJoinedLines();
+
+        var fsm = FiniteStateMachine<PostfixCalculator.PostfixState, PostfixCalculator.PostfixEvent>.FromMermaidDiagram(mermaid, instanceContext: new[] { sut });
+        var generatedTransitions = fsm.transitions;
+        var inCodeTransitions = sut.stateMachine.transitions;
+
+        Assert.AreEqual(PostfixCalculator.PostfixState.NeitherOperand, fsm.CurrentState);
+        Assert.IsFalse(fsm.HasEnded);
+
+        Assert.AreEqual(generatedTransitions.Count, inCodeTransitions.Count);
+        foreach (var entry in inCodeTransitions) {
+            Assert.IsTrue(generatedTransitions.ContainsKey(entry.Key));
+            Assert.AreEqual(entry.Value.Item1, sut.stateMachine.transitions[entry.Key].newState);
+            Assert.AreEqual(entry.Value.Item2.ToString(), sut.stateMachine.transitions[entry.Key].action.ToString());
+        }
+        
+        // Accept an operand and verify it moves to LeftOperand state
+        fsm.Accept(PostfixCalculator.PostfixEvent.Operand);
+        Assert.AreEqual(PostfixCalculator.PostfixState.LeftOperand, fsm.CurrentState);
+
+        // Accept another operand and verify it moves to BothOperands state
+        fsm.Accept(PostfixCalculator.PostfixEvent.Operand);
+        Assert.AreEqual(PostfixCalculator.PostfixState.BothOperands, fsm.CurrentState);
+
+        // Accept an operator and verify it moves back to LeftOperand state (after calculation)
+        fsm.Accept(PostfixCalculator.PostfixEvent.Operator);
+        Assert.AreEqual(PostfixCalculator.PostfixState.LeftOperand, fsm.CurrentState);
     }
 }
 }

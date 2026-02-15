@@ -68,5 +68,7 @@ namespace NicUtils {
         public static List<T> ListOf<T>(params T[] elements) {
             return new List<T>(elements);
         }
+
+        public static void NoOp() { }
     }
 }

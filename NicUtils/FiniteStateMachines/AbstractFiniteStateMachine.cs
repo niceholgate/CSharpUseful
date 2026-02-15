@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -9,7 +10,7 @@ using System.Xml;
 namespace NicUtils.FiniteStateMachines {
     // TODO: what is the purpose of this rather than just a consolidated FiniteStateMachine class?
     public abstract class AbstractFiniteStateMachine<TState, TEvent, TAction>
-        where TState : notnull where TEvent : notnull {
+        where TState : notnull, Enum where TEvent : notnull, Enum {
 
         public bool HasEnded { get { return CurrentState.Equals(endState); } }
 
@@ -72,74 +73,6 @@ namespace NicUtils.FiniteStateMachines {
             return state.ToString().ToUpper().Equals("END");
         }
 
-        public string ToMermaidDiagram() {
-            StringBuilder diagram = new StringBuilder();
-
-            diagram.Append("stateDiagram-v2");
-            diagram.Append('\n');
-            diagram.Append($"    [*] --> {InitialState}");
-            diagram.Append('\n');
-
-            foreach (var item in transitions) {
-                diagram.Append($"    {item.Key.currentState} --> {item.Value.newState}: {item.Key.evnt}");
-                diagram.Append('\n');
-            }
-            diagram.Remove(diagram.Length-1, 1);
-
-            return diagram.ToString();
-        }
-
-        public static FiniteStateMachine<string, string> FromMermaidDiagram(string diagramCode) {
-            var transitions = new Dictionary<(string currentState, string evnt), (string newState, Action action)>();
-            string initialState = null;
-            Action noop = () => { };
-
-            string[] lines = diagramCode.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
-            
-            bool foundHeader = false;
-            foreach (var line in lines) {
-                string trimmedLine = line.Trim();
-                if (string.IsNullOrWhiteSpace(trimmedLine)) continue;
-
-                if (!foundHeader) {
-                    if (trimmedLine != "stateDiagram-v2") {
-                        throw new ArgumentException($"Invalid Mermaid diagram header. Expected 'stateDiagram-v2', but found '{trimmedLine}'.");
-                    }
-                    foundHeader = true;
-                    continue;
-                }
-
-                var transitionMatch = Regex.Match(trimmedLine, @"^([\w\[\]\*]+)\s*-->\s*([\w\[\]\*]+)(?:\s*:\s*(.*))?$");
-                if (transitionMatch.Success) {
-                    string currentState = transitionMatch.Groups[1].Value;
-                    string newState = transitionMatch.Groups[2].Value;
-                    string evnt = transitionMatch.Groups[3].Value;
-
-                    if (currentState == "[*]") {
-                        initialState = newState;
-                        continue;
-                    }
-
-                    if (newState == "[*]") {
-                        newState = "end";
-                    }
-
-                    if (string.IsNullOrEmpty(evnt))
-                    {
-                        throw new ArgumentException("Must specify an event that causes this state transition.");
-                    }
-
-                    transitions[(currentState, evnt)] = (newState, noop);
-
-                    if (initialState == null && currentState != "[*]") initialState = currentState;
-                }
-            }
-
-            if (initialState == null) {
-                throw new ArgumentException("Could not determine initial state from Mermaid diagram.");
-            }
-
-            return new FiniteStateMachine<string, string>(transitions, initialState, noop);
-        }
+        protected static void NoOp() { }
     }
 }

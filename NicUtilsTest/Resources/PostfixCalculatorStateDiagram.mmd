@@ -1,11 +1,11 @@
 stateDiagram-v2
     [*] --> NeitherOperand
-    NeitherOperand --> LeftOperand: Operand
-    NeitherOperand --> End: Operator
-    NeitherOperand --> End: Unknown
-    LeftOperand --> BothOperands: Operand
-    LeftOperand --> End: Operator
-    LeftOperand --> End: Unknown
-    BothOperands --> End: Operand
-    BothOperands --> LeftOperand: Operator
-    BothOperands --> End: Unknown
+    NeitherOperand --> LeftOperand: Operand|() => value(NicUtils.FiniteStateMachines.PostfixCalculator).SetLeft()
+    NeitherOperand --> End: Operator|() => value(NicUtils.FiniteStateMachines.PostfixCalculator).SetErrorUnexpectedOperator()
+    NeitherOperand --> End: Unknown|() => value(NicUtils.FiniteStateMachines.PostfixCalculator).SetErrorUnknownSymbol()
+    LeftOperand --> BothOperands: Operand|() => value(NicUtils.FiniteStateMachines.PostfixCalculator).SetRight()
+    LeftOperand --> End: Operator|() => value(NicUtils.FiniteStateMachines.PostfixCalculator).SetErrorUnexpectedOperator()
+    LeftOperand --> End: Unknown|() => value(NicUtils.FiniteStateMachines.PostfixCalculator).SetResult()
+    BothOperands --> End: Operand|() => value(NicUtils.FiniteStateMachines.PostfixCalculator).SetErrorUnexpectedOperand()
+    BothOperands --> LeftOperand: Operator|() => value(NicUtils.FiniteStateMachines.PostfixCalculator).CalcLeft()
+    BothOperands --> End: Unknown|() => value(NicUtils.FiniteStateMachines.PostfixCalculator).SetErrorUnknownSymbol()

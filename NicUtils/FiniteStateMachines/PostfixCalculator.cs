@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace NicUtils.FiniteStateMachines
 {
@@ -19,7 +20,7 @@ namespace NicUtils.FiniteStateMachines
 
         public string Error { get; private set; } = null;
 
-        private enum PostfixState
+        public enum PostfixState
         {
             End,
             NeitherOperand,
@@ -27,16 +28,16 @@ namespace NicUtils.FiniteStateMachines
             BothOperands
         }
 
-        private enum PostfixEvent
+        public enum PostfixEvent
         {
             Operand,
             Operator,
             Unknown
         }
 
-        private readonly FiniteStateMachine<PostfixState, PostfixEvent> stateMachine;
+        public readonly FiniteStateMachine<PostfixState, PostfixEvent> stateMachine;
 
-        private readonly Dictionary<(PostfixState currentState, PostfixEvent evnt), (PostfixState newState, Action action)> stateTransitions;
+        private readonly Dictionary<(PostfixState currentState, PostfixEvent evnt), (PostfixState newState, Expression<Action> action)> stateTransitions;
 
         private double left;
 
@@ -52,19 +53,19 @@ namespace NicUtils.FiniteStateMachines
 
         public PostfixCalculator() {
             stateTransitions = new() {
-                    { (PostfixState.NeitherOperand, PostfixEvent.Operand), (PostfixState.LeftOperand, SetLeft) },
-                    { (PostfixState.NeitherOperand, PostfixEvent.Operator), (PostfixState.End, SetErrorUnexpectedOperator) },
-                    { (PostfixState.NeitherOperand, PostfixEvent.Unknown), (PostfixState.End, SetErrorUnknownSymbol) },
+                    { (PostfixState.NeitherOperand, PostfixEvent.Operand), (PostfixState.LeftOperand, () => SetLeft()) },
+                    { (PostfixState.NeitherOperand, PostfixEvent.Operator), (PostfixState.End, () => SetErrorUnexpectedOperator()) },
+                    { (PostfixState.NeitherOperand, PostfixEvent.Unknown), (PostfixState.End, () => SetErrorUnknownSymbol()) },
 
-                    { (PostfixState.LeftOperand, PostfixEvent.Operand), (PostfixState.BothOperands, SetRight) },
-                    { (PostfixState.LeftOperand, PostfixEvent.Operator), (PostfixState.End, SetErrorUnexpectedOperator) },
-                    { (PostfixState.LeftOperand, PostfixEvent.Unknown), (PostfixState.End, SetResult) },
+                    { (PostfixState.LeftOperand, PostfixEvent.Operand), (PostfixState.BothOperands, () => SetRight()) },
+                    { (PostfixState.LeftOperand, PostfixEvent.Operator), (PostfixState.End, () => SetErrorUnexpectedOperator()) },
+                    { (PostfixState.LeftOperand, PostfixEvent.Unknown), (PostfixState.End, () => SetResult()) },
 
-                    { (PostfixState.BothOperands, PostfixEvent.Operand), (PostfixState.End, SetErrorUnexpectedOperand) },
-                    { (PostfixState.BothOperands, PostfixEvent.Operator), (PostfixState.LeftOperand, CalcLeft) },
-                    { (PostfixState.BothOperands, PostfixEvent.Unknown), (PostfixState.End, SetErrorUnknownSymbol) },
+                    { (PostfixState.BothOperands, PostfixEvent.Operand), (PostfixState.End, () => SetErrorUnexpectedOperand()) },
+                    { (PostfixState.BothOperands, PostfixEvent.Operator), (PostfixState.LeftOperand, () => CalcLeft()) },
+                    { (PostfixState.BothOperands, PostfixEvent.Unknown), (PostfixState.End, () => SetErrorUnknownSymbol()) },
             };
-            stateMachine = new(stateTransitions, PostfixState.NeitherOperand, OnReset);
+            stateMachine = new(stateTransitions, PostfixState.NeitherOperand, () => OnReset());
         }
 
         public void Calculate(string postfixString) {

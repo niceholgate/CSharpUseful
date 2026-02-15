@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Linq.Expressions;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NickUtilsTest {
 
@@ -13,77 +14,93 @@ using NicUtils.FiniteStateMachines;
 [TestClass]
 public class FiniteStateMachineTests {
 
-    private static readonly List<String> eventHistory = new();
+    public enum TestStateEnum { initial, interim, end, interim1, interim2, unknown_initial }
+    public enum TestEventEnum { eventA, eventB, eventC }
 
-    private static readonly List<String> stateHistory = new() { "initial" };
+    private static readonly List<TestEventEnum> eventHistory = new();
 
-    private static readonly Dictionary<(String, String), (String, Action)> transitionsGood = new() {
-            { ("initial", "eventA"), ("interim", ()=>{eventHistory.Add("A"); stateHistory.Add("interim"); }) },
-            { ("interim", "eventA"), ("initial", ()=>{eventHistory.Add("A"); stateHistory.Add("initial"); }) },
-            { ("interim", "eventB"), ("end", ()=>{eventHistory.Add("B"); stateHistory.Add("end"); }) }
+    private static readonly List<TestStateEnum> stateHistory = new() { TestStateEnum.initial };
+
+    private readonly Dictionary<(TestStateEnum, TestEventEnum), (TestStateEnum, Expression<Action>)> transitionsGood = new() {
+            { (TestStateEnum.initial, TestEventEnum.eventA), (TestStateEnum.interim, ()=>UpdateHistories(TestEventEnum.eventA, TestStateEnum.interim)) },
+            { (TestStateEnum.interim, TestEventEnum.eventA), (TestStateEnum.initial, ()=>UpdateHistories(TestEventEnum.eventA, TestStateEnum.initial)) },
+            { (TestStateEnum.interim, TestEventEnum.eventB), (TestStateEnum.end, ()=>UpdateHistories(TestEventEnum.eventB, TestStateEnum.end)) }
         };
 
+    static void UpdateHistories(TestEventEnum evnt, TestStateEnum newState) {
+        eventHistory.Add(evnt);
+        stateHistory.Add(newState);
+    }
+
+    static void ResetEventAndStateHistories() {
+        eventHistory.Clear();
+        stateHistory.Clear();
+        stateHistory.Add(TestStateEnum.initial);
+    }
+
+    static void NoOp() { }
+    
     [TestMethod]
     public void TestHappyPathToEndStateAndReset() {
-        FiniteStateMachine<String, String> sut = new(transitionsGood, "initial", () => { eventHistory.Clear(); stateHistory.Clear(); stateHistory.Add("initial"); });
+        FiniteStateMachine<TestStateEnum, TestEventEnum> sut = new(transitionsGood, TestStateEnum.initial, () => ResetEventAndStateHistories());
 
-        sut.Accept("eventA");
-        sut.Accept("eventA");
-        sut.Accept("eventA");
-        sut.Accept("eventB");
+        sut.Accept(TestEventEnum.eventA);
+        sut.Accept(TestEventEnum.eventA);
+        sut.Accept(TestEventEnum.eventA);
+        sut.Accept(TestEventEnum.eventB);
 
         Assert.IsTrue(sut.HasEnded);
-        Assert.IsTrue(eventHistory.SequenceEqual(ListOf("A", "A", "A", "B")));
-        AssertSequencesAreEqual(stateHistory, ListOf("initial", "interim", "initial", "interim", "end"));
+        Assert.IsTrue(eventHistory.SequenceEqual(ListOf(TestEventEnum.eventA, TestEventEnum.eventA, TestEventEnum.eventA, TestEventEnum.eventB)));
+        AssertSequencesAreEqual(stateHistory, ListOf(TestStateEnum.initial, TestStateEnum.interim, TestStateEnum.initial, TestStateEnum.interim, TestStateEnum.end));
 
         sut.Reset();
         Assert.IsFalse(sut.HasEnded);
-        Assert.IsTrue(eventHistory.SequenceEqual(ListOf<string>()));
-        Assert.IsTrue(stateHistory.SequenceEqual(ListOf("initial")));
+        Assert.IsTrue(eventHistory.SequenceEqual(ListOf<TestEventEnum>()));
+        Assert.IsTrue(stateHistory.SequenceEqual(ListOf(TestStateEnum.initial)));
     }
 
     [TestMethod]
     public void TestInit_UnknownInitialState() {
-        AssertThrowsExceptionWithMessage<ArgumentException>(() => { FiniteStateMachine<String, String> sut = new(transitionsGood, "unknown_initial", () => {}); },
+        AssertThrowsExceptionWithMessage<ArgumentException>(() => { FiniteStateMachine<TestStateEnum, TestEventEnum> sut = new(transitionsGood, TestStateEnum.unknown_initial, () => NoOp()); },
             "The requested initialState (\"unknown_initial\") is not among the states defined in the transitions matrix.");
     }
 
     [TestMethod]
     public void TestInit_NoEndState() {
-        Dictionary<(String, String), (String, Action)> transitionsNoEndState = new() {
-            { ("initial", "eventA"), ("interim", () => {}) },
-            { ("interim", "eventA"), ("initial", () => {}) }
+        Dictionary<(TestStateEnum, TestEventEnum), (TestStateEnum, Expression<Action>)> transitionsNoEndState = new() {
+            { (TestStateEnum.initial, TestEventEnum.eventA), (TestStateEnum.interim, () => NoOp()) },
+            { (TestStateEnum.interim, TestEventEnum.eventA), (TestStateEnum.initial, () => NoOp()) }
         };
 
-        AssertThrowsExceptionWithMessage<ArgumentException>(() => {FiniteStateMachine<String, String> sut = new(transitionsNoEndState, "initial", () => {});},
+        AssertThrowsExceptionWithMessage<ArgumentException>(() => {FiniteStateMachine<TestStateEnum, TestEventEnum> sut = new(transitionsNoEndState, TestStateEnum.initial, () => NoOp());},
             "There is no END state!");
     }
 
     [TestMethod]
     public void TestInit_AllNonEndStatesMustBeExitable() {
-        Dictionary<(String, String), (String, Action)> transitionsCantExitInterims = new() {
-            { ("initial", "eventA"), ("interim1", () => {}) },
-            { ("initial", "eventB"), ("interim2", () => {}) },
-            { ("initial", "eventC"), ("end", () => {}) }
+        Dictionary<(TestStateEnum, TestEventEnum), (TestStateEnum, Expression<Action>)> transitionsCantExitInterims = new() {
+            { (TestStateEnum.initial, TestEventEnum.eventA), (TestStateEnum.interim1, () => NoOp()) },
+            { (TestStateEnum.initial, TestEventEnum.eventB), (TestStateEnum.interim2, () => NoOp()) },
+            { (TestStateEnum.initial, TestEventEnum.eventC), (TestStateEnum.end, () => NoOp()) }
         };
-        AssertThrowsExceptionWithMessage<ArgumentException>(() => { FiniteStateMachine<String, String> sut = new(transitionsCantExitInterims, "initial", () => {}); },
+        AssertThrowsExceptionWithMessage<ArgumentException>(() => { FiniteStateMachine<TestStateEnum, TestEventEnum> sut = new(transitionsCantExitInterims, TestStateEnum.initial, () => NoOp()); },
             "The following states cannot be exited (only the END state should be un-exitable): interim1, interim2, end");
     }
 
     [TestMethod]
     public void TestInit_EndStateMustNotBeExitable() {
-        Dictionary<(String, String), (String, Action)> transitionsCanExitEndState = new() {
-            { ("initial", "eventA"), ("interim1", () => {}) },
-            { ("initial", "eventB"), ("end", () => {}) },
-            { ("end", "eventC"), ("interim1", () => {}) }
+        Dictionary<(TestStateEnum, TestEventEnum), (TestStateEnum, Expression<Action>)> transitionsCanExitEndState = new() {
+            { (TestStateEnum.initial, TestEventEnum.eventA), (TestStateEnum.interim1, () => NoOp()) },
+            { (TestStateEnum.initial, TestEventEnum.eventB), (TestStateEnum.end, () => NoOp()) },
+            { (TestStateEnum.end, TestEventEnum.eventC), (TestStateEnum.interim1, () => NoOp()) }
         };
-        AssertThrowsExceptionWithMessage<ArgumentException>(() => { FiniteStateMachine<String, String> sut = new(transitionsCanExitEndState, "initial", () => { }); },
+        AssertThrowsExceptionWithMessage<ArgumentException>(() => { FiniteStateMachine<TestStateEnum, TestEventEnum> sut = new(transitionsCanExitEndState, TestStateEnum.initial, () => NoOp()); },
             "The END state should not be exitable!");
     }
 
     [TestMethod]
     public void TestGetMermaidDiagram() {
-        FiniteStateMachine<String, String> sut = new(transitionsGood, "initial", () => { eventHistory.Clear(); stateHistory.Clear(); stateHistory.Add("initial"); });
+        FiniteStateMachine<TestStateEnum, TestEventEnum> sut = new(transitionsGood, TestStateEnum.initial, () => ResetEventAndStateHistories());
 
         string diagram = sut.ToMermaidDiagram();
         string filepath = "../../../Resources/RegressionTestStateDiagram.mmd";
@@ -103,17 +120,24 @@ public class FiniteStateMachineTests {
         string filepath = "../../../Resources/RegressionTestStateDiagram.mmd";
         string mermaid = new NicUtils.TextLineReader(filepath).GetJoinedLines();
 
-        var sut = FiniteStateMachine<string, string>.FromMermaidDiagram(mermaid);
+        ResetEventAndStateHistories();
+        var sut = FiniteStateMachine<TestStateEnum, TestEventEnum>.FromMermaidDiagram(mermaid, typeContext: new[] { typeof(FiniteStateMachineTests) });
 
-        Assert.AreEqual("initial", sut.CurrentState);
+        Assert.AreEqual(TestStateEnum.initial, sut.CurrentState);
         Assert.IsFalse(sut.HasEnded);
 
         Assert.AreEqual(transitionsGood.Count, sut.transitions.Count);
         foreach (var entry in transitionsGood) {
             Assert.IsTrue(sut.transitions.ContainsKey(entry.Key));
             Assert.AreEqual(entry.Value.Item1, sut.transitions[entry.Key].newState);
-            // In the Mermaid diagram, the actions are no-op, so we don't compare them with transitionsGood actions
+            Assert.AreEqual(entry.Value.Item2.ToString(), sut.transitions[entry.Key].action.ToString());
         }
+
+        // Verify actions are actually parsed and executable
+        sut.Accept(TestEventEnum.eventA);
+        Assert.AreEqual(TestStateEnum.interim, sut.CurrentState);
+        Assert.IsTrue(eventHistory.Contains(TestEventEnum.eventA));
+        Assert.IsTrue(stateHistory.Contains(TestStateEnum.interim));
     }
 
     [TestMethod]
@@ -123,7 +147,7 @@ public class FiniteStateMachineTests {
                             initial --> end: event";
 
         AssertThrowsExceptionWithMessage<ArgumentException>(() => {
-            FiniteStateMachine<string, string>.FromMermaidDiagram(mermaid);
+            FiniteStateMachine<TestStateEnum, TestEventEnum>.FromMermaidDiagram(mermaid);
         }, "Invalid Mermaid diagram header. Expected 'stateDiagram-v2', but found 'invalid-header'.");
     }
 }
