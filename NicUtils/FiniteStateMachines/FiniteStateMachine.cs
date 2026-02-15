@@ -55,6 +55,9 @@ namespace NicUtils.FiniteStateMachines {
 
             foreach (var item in transitions) {
                 string actionStr = item.Value.action.ToString();
+                // Strip the "value(...)." part for instance methods to make it look like static methods
+                actionStr = System.Text.RegularExpressions.Regex.Replace(actionStr, @"value\(.*?\)\.", "");
+                
                 diagram.Append($"    {item.Key.currentState} --> {item.Value.newState}: {item.Key.evnt}|{actionStr}");
                 diagram.Append('\n');
             }
@@ -143,7 +146,8 @@ namespace NicUtils.FiniteStateMachines {
         }
 
         private static Expression<Action> ParseActionExpression(string expressionStr, IEnumerable<Type> typeContext, IEnumerable<object> instanceContext) {
-            // Very basic parser for "() => MethodName(args)" or "() => value(Type).MethodName(args)"
+            // Basic parser for "() => MethodName(args)" or "() => value(Type).MethodName(args)"
+            // The value(Type). part is now optional
             var match = System.Text.RegularExpressions.Regex.Match(expressionStr, @"^\(\) => (?:value\(([^)]+)\)\.)?(\w+)\((.*)\)$");
             if (!match.Success) return null;
 
@@ -157,7 +161,7 @@ namespace NicUtils.FiniteStateMachines {
                     .Select(s => s.Trim().Trim('"')).ToArray();
 
             if (string.IsNullOrEmpty(typeName)) {
-                // Static method call or method in typeContext
+                // Try static method call or method in typeContext
                 if (typeContext != null) {
                     foreach (var type in typeContext) {
                         var method = type.GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
@@ -178,8 +182,30 @@ namespace NicUtils.FiniteStateMachines {
                         }
                     }
                 }
+                
+                // Also try instance method call if typeName is missing but instanceContext is provided
+                if (instanceContext != null) {
+                    foreach (var instance in instanceContext) {
+                        var method = instance.GetType().GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                        if (method != null) {
+                            var paramInfos = method.GetParameters();
+                            if (paramInfos.Length == args.Length) {
+                                var argExpressions = args.Zip(paramInfos, (arg, param) => {
+                                    object convertedArg;
+                                    if (param.ParameterType.IsEnum) {
+                                        convertedArg = Enum.Parse(param.ParameterType, arg);
+                                    } else {
+                                        convertedArg = Convert.ChangeType(arg, param.ParameterType);
+                                    }
+                                    return Expression.Constant(convertedArg);
+                                }).ToArray();
+                                return Expression.Lambda<Action>(Expression.Call(Expression.Constant(instance), method, argExpressions));
+                            }
+                        }
+                    }
+                }
             } else {
-                // Instance method call
+                // Instance method call with explicit type name
                 if (instanceContext != null) {
                     foreach (var instance in instanceContext) {
                         if (instance.GetType().FullName == typeName || instance.GetType().Name == typeName) {
