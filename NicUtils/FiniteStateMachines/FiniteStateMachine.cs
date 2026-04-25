@@ -14,12 +14,13 @@ namespace NicUtils.FiniteStateMachines {
     public class FiniteStateMachine<TState, TEvent> : AbstractFiniteStateMachine<TState, TEvent, Expression<Action>>
         where TState : struct, Enum where TEvent : struct, Enum {
 
-        private readonly Action resetAction;
-        private readonly Dictionary<(TState currentState, TEvent evnt), Action> compiledActions = new();
+        protected readonly Action resetAction;
+        protected readonly Dictionary<(TState currentState, TEvent evnt), Action> compiledActions = new();
 
         public FiniteStateMachine(Dictionary<(TState currentState, TEvent evnt), (TState newState, Expression<Action> action)> transitions,
                                   TState initialState,
-                                  Expression<Action> resetAction) : base(transitions, initialState) {
+                                  Expression<Action> resetAction,
+                                  HashSet<TState> allStates = null) : base(transitions, initialState, allStates) {
             this.resetAction = resetAction.Compile();
             foreach (var transition in transitions) {
                 compiledActions[transition.Key] = transition.Value.action.Compile();
@@ -45,7 +46,7 @@ namespace NicUtils.FiniteStateMachines {
             CurrentState = transitions[(CurrentState, evnt)].newState;
         }
 
-        public string ToMermaidDiagram() {
+        public virtual string ToMermaidDiagram() {
             StringBuilder diagram = new StringBuilder();
 
             diagram.Append("stateDiagram-v2");
@@ -55,7 +56,8 @@ namespace NicUtils.FiniteStateMachines {
 
             foreach (var item in transitions) {
                 string actionStr = item.Value.action.ToString();
-                // Strip the "value(...)." part for instance methods to make it look like static methods
+                // Strip "() => " and "value(...)."
+                actionStr = System.Text.RegularExpressions.Regex.Replace(actionStr, @"^.*?\s*=>\s*", "");
                 actionStr = System.Text.RegularExpressions.Regex.Replace(actionStr, @"value\(.*?\)\.", "");
                 
                 diagram.Append($"    {item.Key.currentState} --> {item.Value.newState}: {item.Key.evnt}|{actionStr}");
@@ -134,21 +136,22 @@ namespace NicUtils.FiniteStateMachines {
 
             TState initialStateEnum = ParseEnumOrThrow<TState>(initialState);
             return new FiniteStateMachine<TState, TEvent>(transitions, initialStateEnum, () => NoOp());
+
         }
         
-        private static T ParseEnumOrThrow<T>(string str) where T : struct, Enum
+        protected static T ParseEnumOrThrow<T>(string str) where T : struct, Enum
         {
-            if (Enum.TryParse(str, out T result))
+            if (Enum.TryParse(str, true, out T result))
             {
                 return result;
             }
             throw new ArgumentException($"Could not parse string '{str}' to enum of type {typeof(T).Name}.");
         }
 
-        private static Expression<Action> ParseActionExpression(string expressionStr, IEnumerable<Type> typeContext, IEnumerable<object> instanceContext) {
+        protected static Expression<Action> ParseActionExpression(string expressionStr, IEnumerable<Type> typeContext, IEnumerable<object> instanceContext) {
             // Basic parser for "() => MethodName(args)" or "() => value(Type).MethodName(args)"
-            // The value(Type). part is now optional
-            var match = System.Text.RegularExpressions.Regex.Match(expressionStr, @"^\(\) => (?:value\(([^)]+)\)\.)?(\w+)\((.*)\)$");
+            // The value(Type). part is now optional, as is the () => prefix
+            var match = System.Text.RegularExpressions.Regex.Match(expressionStr, @"^(?:\(\) => )?(?:value\(([^)]+)\)\.)?(\w+)\((.*)\)$");
             if (!match.Success) return null;
 
             string typeName = match.Groups[1].Value;

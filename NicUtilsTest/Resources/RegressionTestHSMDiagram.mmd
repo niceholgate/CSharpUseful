@@ -1,0 +1,14 @@
+stateDiagram-v2
+    [*] --> "Off"
+    state "Off"
+    state "On" {
+        [*] --> "On_Idle"
+        state "On_Idle"
+        state "On_Working"
+    }
+    state "End"
+    "Off" --> "On": PowerOn|Log(\"Action: Powering On\")
+    "On_Idle" --> "On_Working": Work|Log(\"Action: Starting Work\")
+    "On_Working" --> "On_Idle": Stop|Log(\"Action: Stopping Work\")
+    "On" --> "Off": PowerOff|Log(\"Action: Powering Off\")
+    "Off" --> "End": Finish|Log(\"Action: Finishing\")

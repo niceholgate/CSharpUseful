@@ -1,5 +1,5 @@
 stateDiagram-v2
     [*] --> initial
-    initial --> interim: eventA|() => UpdateHistories(eventA, interim)
-    interim --> initial: eventA|() => UpdateHistories(eventA, initial)
-    interim --> end: eventB|() => UpdateHistories(eventB, end)
+    initial --> interim: eventA|UpdateHistories(eventA, interim)
+    interim --> initial: eventA|UpdateHistories(eventA, initial)
+    interim --> end: eventB|UpdateHistories(eventB, end)

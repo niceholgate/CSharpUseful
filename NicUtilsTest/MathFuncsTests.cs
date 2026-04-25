@@ -45,12 +45,12 @@ public class MathFuncsTests {
 
     [TestMethod]
     public void HeuristicDistances() {
-        (double, double) coords1 = ( 0.0, 0.0 );
-        (double, double) coords2 = ( 1.0, 2.0 );
-        AssertEqualWithinTolerance(5.0, Distances2D.GetDistance(coords1, coords2, Distances2D.HeuristicType.EuclidianSquared), 1E-9);
-        AssertEqualWithinTolerance(Math.Sqrt(5.0), Distances2D.GetDistance(coords1, coords2, Distances2D.HeuristicType.Euclidian), 1E-9);
-        AssertEqualWithinTolerance(Math.Sqrt(2.0) + 1.0, Distances2D.GetDistance(coords1, coords2, Distances2D.HeuristicType.Octile), 1E-9);
-        AssertEqualWithinTolerance(3.0, Distances2D.GetDistance(coords1, coords2, Distances2D.HeuristicType.Manhattan), 1E-9);
+        var coords1 = ( 0.0f, 0.0f );
+        var coords2 = ( 1.0f, 2.0f );
+        AssertEqualWithinTolerance(5.0, Distances2D.GetDistance(coords1, coords2, Distances2D.HeuristicType.EuclidianSquared), 1E-9f);
+        AssertEqualWithinTolerance(MathF.Sqrt(5.0f), Distances2D.GetDistance(coords1, coords2, Distances2D.HeuristicType.Euclidian), 1E-9f);
+        AssertEqualWithinTolerance(MathF.Sqrt(2.0f) + 1.0f, Distances2D.GetDistance(coords1, coords2, Distances2D.HeuristicType.Octile), 1E-9f);
+        AssertEqualWithinTolerance(3.0, Distances2D.GetDistance(coords1, coords2, Distances2D.HeuristicType.Manhattan), 1E-9f);
     }
 }
 }

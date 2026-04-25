@@ -1,0 +1,6 @@
+State,Entry Action,Exit Action
+End,,
+Off,() => Log("Entry: Off"),() => Log("Exit: Off")
+On,() => Log("Entry: On"),() => Log("Exit: On")
+On_Idle,() => Log("Entry: On_Idle"),() => Log("Exit: On_Idle")
+On_Working,() => Log("Entry: On_Working"),() => Log("Exit: On_Working")

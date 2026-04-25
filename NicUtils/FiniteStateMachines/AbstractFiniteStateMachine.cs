@@ -25,20 +25,29 @@ namespace NicUtils.FiniteStateMachines {
         protected readonly TState endState;
 
         public AbstractFiniteStateMachine(Dictionary<(TState currentState, TEvent evnt), (TState newState, TAction action)> transitions,
-                                          TState initialState) {
-            AllStates = transitions.Keys
-                .Select(k => k.currentState)
-                .Union(transitions.Values
-                    .Select(v => v.newState)
-                    .OfType<TState>())
-                .ToHashSet();
+                                          TState initialState,
+                                          HashSet<TState> allStates = null) {
+            this.transitions = transitions;
+            InitialState = initialState;
+            CurrentState = initialState;
+
+            if (allStates != null) {
+                AllStates = allStates;
+            } else {
+                AllStates = transitions.Keys
+                    .Select(k => k.currentState)
+                    .Union(transitions.Values
+                        .Select(v => v.newState)
+                        .OfType<TState>())
+                    .ToHashSet();
+            }
 
             // Validate initialState is in AllStates
             if (!AllStates.Contains(initialState)) {
                 throw new ArgumentException($"The requested initialState (\"{initialState}\") is not among the states defined in the transitions matrix.");
             }
 
-            // Validate that there is an "END" state
+            // Set the end state
             IEnumerable<TState> endStates = AllStates.Where(IsEndState);
             if (endStates.Count() != 1) {
                 throw new ArgumentException("There is no END state!");
@@ -46,6 +55,10 @@ namespace NicUtils.FiniteStateMachines {
                 endState = endStates.First();
             }
 
+            Validate();
+        }
+
+        protected virtual void Validate() {
             // Validate END state cannot be exited, but all other states can be
             HashSet<TState> exitableStates = transitions
                 .Where(transition => !transition.Key.currentState.Equals(transition.Value.newState))
@@ -59,10 +72,6 @@ namespace NicUtils.FiniteStateMachines {
             if (!IsEndState(unexitableStates.First())) {
                 throw new ArgumentException($"The END state should not be exitable!");
             }
-
-            this.transitions = transitions;
-            InitialState = initialState;
-            CurrentState = initialState;
         }
         
         // TODO: private static void ValidateTransitions
