@@ -161,7 +161,14 @@ namespace NicUtils.FiniteStateMachines {
         public override string ToMermaidDiagram() {
             StringBuilder diagram = new StringBuilder();
             diagram.AppendLine("stateDiagram-v2");
-            diagram.AppendLine($"    [*] --> \"{EscapeQuotes(GetDecoratedName(InitialState))}\"");
+
+            // Group transitions by LCA parent
+            var transitionsByLCA = transitions
+                .GroupBy(t => FindLCA(t.Key.currentState, t.Value.newState))
+                .ToList();
+
+            // Initial transition
+            diagram.AppendLine($"    [*] --> {InitialState}");
 
             // Group states by parent
             var rootChildren = AllStates.Where(s => GetParent(s) == null).ToList();
@@ -169,20 +176,48 @@ namespace NicUtils.FiniteStateMachines {
                 .GroupBy(s => GetParent(s).Value)
                 .ToDictionary(g => g.Key, g => g.ToList());
 
-            // Process states starting from root
-            AppendStateDefinitions(diagram, rootChildren, childrenByParent, 1);
-
-            // Add transitions
-            foreach (var item in transitions) {
-                string actionStr = item.Value.action.ToString();
-                // Strip "() => " and "value(...)."
-                actionStr = Regex.Replace(actionStr, @"^.*?\s*=>\s*", "");
-                actionStr = Regex.Replace(actionStr, @"value\(.*?\)\.", "");
-                
-                diagram.AppendLine($"    \"{EscapeQuotes(GetDecoratedName(item.Key.currentState))}\" --> \"{EscapeQuotes(GetDecoratedName(item.Value.newState))}\": {item.Key.evnt}|{EscapeQuotes(actionStr)}");
-            }
+            // Process states and transitions starting from root
+            AppendStateDefinitions(diagram, rootChildren, childrenByParent, transitionsByLCA, null, 1);
 
             return diagram.ToString().TrimEnd();
+        }
+
+        private void AppendStateDefinitions(
+            StringBuilder diagram, 
+            List<TState> children, 
+            Dictionary<TState, List<TState>> childrenByParent, 
+            List<IGrouping<TState?, KeyValuePair<(TState currentState, TEvent evnt), (TState newState, Expression<Action> action)>>> transitionsByLCA,
+            TState? currentParent,
+            int indentLevel) {
+            
+            string indent = new string(' ', indentLevel * 4);
+
+            // Add states that are parents
+            foreach (var child in children) {
+                if (childrenByParent.ContainsKey(child)) {
+                    diagram.AppendLine($"{indent}state {child} {{");
+                    
+                    if (initialSubStates.TryGetValue(child, out var initial)) {
+                        diagram.AppendLine($"{indent}    [*] --> {initial}");
+                    }
+
+                    AppendStateDefinitions(diagram, childrenByParent[child], childrenByParent, transitionsByLCA, child, indentLevel + 1);
+                    diagram.AppendLine($"{indent}}}");
+                }
+            }
+
+            // Add transitions belonging to this LCA
+            var localTransitions = transitionsByLCA.FirstOrDefault(g => EqualityComparer<TState?>.Default.Equals(g.Key, currentParent));
+            if (localTransitions != null) {
+                foreach (var item in localTransitions) {
+                    string actionStr = item.Value.action.ToString();
+                    // Strip "() => " and "value(...)."
+                    actionStr = Regex.Replace(actionStr, @"^.*?\s*=>\s*", "");
+                    actionStr = Regex.Replace(actionStr, @"value\(.*?\)\.", "");
+                    
+                    diagram.AppendLine($"{indent}{item.Key.currentState} --> {item.Value.newState}: {item.Key.evnt}|{actionStr}");
+                }
+            }
         }
 
         public string ToActionsCsv() {
@@ -215,33 +250,6 @@ namespace NicUtils.FiniteStateMachines {
         }
 
         private string EscapeQuotes(string s) => s.Replace("\"", "\\\"");
-
-        private string GetDecoratedName(TState state) {
-            // Updated to NOT include actions in the Mermaid diagram names
-            return state.ToString();
-        }
-
-        private void AppendStateDefinitions(StringBuilder diagram, List<TState> children, Dictionary<TState, List<TState>> childrenByParent, int indentLevel) {
-            string indent = new string(' ', indentLevel * 4);
-            foreach (var child in children) {
-                bool isParent = childrenByParent.ContainsKey(child);
-                string decorated = GetDecoratedName(child);
-
-                if (isParent) {
-                    diagram.AppendLine($"{indent}state \"{EscapeQuotes(decorated)}\" {{");
-                    
-                    if (initialSubStates.TryGetValue(child, out var initial)) {
-                        diagram.AppendLine($"{indent}    [*] --> \"{EscapeQuotes(GetDecoratedName(initial))}\"");
-                    }
-
-                    AppendStateDefinitions(diagram, childrenByParent[child], childrenByParent, indentLevel + 1);
-                    diagram.AppendLine($"{indent}}}");
-                } else {
-                    // Always define states with quoted names
-                    diagram.AppendLine($"{indent}state \"{EscapeQuotes(decorated)}\"");
-                }
-            }
-        }
 
         public static HierarchicalFiniteStateMachine<TState, TEvent> FromMermaidDiagram(string diagramCode, string actionsCsv, IEnumerable<Type> typeContext = null, IEnumerable<object> instanceContext = null) {
             var entryActions = new Dictionary<TState, Expression<Action>>();

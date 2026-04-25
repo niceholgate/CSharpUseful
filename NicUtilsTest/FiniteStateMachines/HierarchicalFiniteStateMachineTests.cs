@@ -132,10 +132,11 @@ namespace NickUtilsTest {
             string diagram = hsm.ToMermaidDiagram();
             
             // Verify decorations are GONE
-            Assert.IsTrue(diagram.Contains("\"Off\""), "Off should be in diagram");
-            Assert.IsTrue(diagram.Contains("\"On\""), "On should be in diagram");
+            Assert.IsTrue(diagram.Contains("Off"), "Off should be in diagram");
+            Assert.IsTrue(diagram.Contains("On"), "On should be in diagram");
             Assert.IsFalse(diagram.Contains("entry/"), "No entry decorations should be present");
             Assert.IsFalse(diagram.Contains("exit/"), "No exit decorations should be present");
+            Assert.IsTrue(diagram.Contains("Off --> On:"), "On should be used in a transition without quotes");
 
             // Verify CSV
             string csv = hsm.ToActionsCsv();
