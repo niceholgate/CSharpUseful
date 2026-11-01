@@ -68,6 +68,15 @@ namespace NicUtils.FiniteStateMachines {
             return diagram.ToString();
         }
 
+        public void WriteMermaidDiagramToFile(string directoryPath, string filename)
+        {
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+            File.WriteAllText(Path.Combine(directoryPath, filename), ToMermaidDiagram());
+        }
+
         public static FiniteStateMachine<TState, TEvent> FromMermaidDiagram(string diagramCode, IEnumerable<Type> typeContext = null, IEnumerable<object> instanceContext = null) {
             var transitions = new Dictionary<(TState currentState, TEvent evnt), (TState newState, Expression<Action> action)>();
             string initialState = null;

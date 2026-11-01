@@ -103,6 +103,64 @@ namespace NickUtilsTest {
         }
 
         [TestMethod]
+        public void TestHSM_IsInState() {
+            var transitions = new Dictionary<(State, Event), (State, Expression<Action>)> {
+                { (State.Off, Event.PowerOn), (State.On, () => Log("Action: Powering On")) },
+                { (State.On_Idle, Event.Work), (State.On_Working, () => Log("Action: Starting Work")) },
+                { (State.On_Working, Event.Stop), (State.On_Idle, () => Log("Action: Stopping Work")) },
+                { (State.On, Event.PowerOff), (State.Off, () => Log("Action: Powering Off")) },
+                { (State.Off, Event.Finish), (State.End, () => Log("Action: Finishing")) }
+            };
+
+            var parents = new Dictionary<State, State> {
+                { State.On_Idle, State.On },
+                { State.On_Working, State.On }
+            };
+
+            var initialSubStates = new Dictionary<State, State> {
+                { State.On, State.On_Idle }
+            };
+
+            var hsm = new HierarchicalFiniteStateMachine<State, Event>(
+                transitions,
+                State.Off,
+                () => log.Clear(),
+                parents,
+                initialSubStates
+            );
+
+            // Initial state is Off (a top-level state)
+            Assert.AreEqual(State.Off, hsm.CurrentState);
+            Assert.IsTrue(hsm.IsInState(State.Off));
+            Assert.IsFalse(hsm.IsInState(State.On));
+            Assert.IsFalse(hsm.IsInState(State.On_Idle));
+            Assert.IsFalse(hsm.IsInState(State.End));
+
+            // Transition Off -> On (deep entry into On_Idle)
+            hsm.Accept(Event.PowerOn);
+            Assert.AreEqual(State.On_Idle, hsm.CurrentState);
+            Assert.IsTrue(hsm.IsInState(State.On_Idle));
+            Assert.IsTrue(hsm.IsInState(State.On));
+            Assert.IsFalse(hsm.IsInState(State.Off));
+            Assert.IsFalse(hsm.IsInState(State.On_Working));
+            Assert.IsFalse(hsm.IsInState(State.End));
+
+            // Transition On_Idle -> On_Working
+            hsm.Accept(Event.Work);
+            Assert.AreEqual(State.On_Working, hsm.CurrentState);
+            Assert.IsTrue(hsm.IsInState(State.On_Working));
+            Assert.IsTrue(hsm.IsInState(State.On));
+            Assert.IsFalse(hsm.IsInState(State.On_Idle));
+            Assert.IsFalse(hsm.IsInState(State.Off));
+
+            // Transition On_Working -> On_Idle via bubbling (PowerOff is on On)
+            hsm.Accept(Event.PowerOff);
+            Assert.AreEqual(State.Off, hsm.CurrentState);
+            Assert.IsTrue(hsm.IsInState(State.Off));
+            Assert.IsFalse(hsm.IsInState(State.On));
+        }
+
+        [TestMethod]
         public void TestHSM_ToMermaidDiagram_AllCombinations() {
             var transitions = new Dictionary<(State, Event), (State, Expression<Action>)> {
                 { (State.Off, Event.PowerOn), (State.On, () => Log("Action: Powering On")) },

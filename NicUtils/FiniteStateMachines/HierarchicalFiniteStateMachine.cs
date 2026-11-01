@@ -77,6 +77,17 @@ namespace NicUtils.FiniteStateMachines {
             ExecuteTransition(sourceState.Value, transition.Value.newState, transition.Value.action);
         }
 
+        public bool IsInState(TState state) {
+            TState? current = CurrentState;
+            while (current.HasValue) {
+                if (current.Value.Equals(state)) {
+                    return true;
+                }
+                current = GetParent(current.Value);
+            }
+            return false;
+        }
+
         private void ExecuteTransition(TState source, TState target, Action transitionAction) {
             TState? lca = FindLCA(CurrentState, target);
 
